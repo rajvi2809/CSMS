@@ -44,32 +44,50 @@ export default function Sidebar() {
                 DashBoard
               </NavLink>
             </li>
-            <li className="line-wrapper">
-              <img className="listlogo-img" src="./book.svg" alt="Home Icon" />{" "}
-              <NavLink className="navlink-class" to="/booking">
-                Booking Management
-              </NavLink>
-            </li>
-            <li className="line-wrapper">
-              <img className="listlogo-img" src="./user.svg" alt="Home Icon" />
-              <p>Users </p>
-            </li>
-            <li className="line-wrapper">
-              <img
-                className="listlogo-img"
-                src="./charge.svg"
-                alt="Home Icon"
-              />
-              <p>Charging stations </p>
-            </li>
-            <li className="line-wrapper">
-              <img
-                className="listlogo-img"
-                src="./charger.svg"
-                alt="Home Icon"
-              />
-              <p>Chargers </p>
-            </li>
+
+            <NavLink className="navlink-class" to="/booking">
+              <li className="line-wrapper">
+                <img
+                  className="listlogo-img"
+                  src="./book.svg"
+                  alt="Home Icon"
+                />{" "}
+                <p>Booking Management</p>
+              </li>
+            </NavLink>
+
+            <NavLink className="navlink-class" to="/users">
+              <li className="line-wrapper">
+                <img
+                  className="listlogo-img"
+                  src="./user.svg"
+                  alt="Home Icon"
+                />
+                <p>Users </p>
+              </li>
+            </NavLink>
+
+            <NavLink className="navlink-class" to="/charging-stations">
+              <li className="line-wrapper">
+                <img
+                  className="listlogo-img"
+                  src="./charge.svg"
+                  alt="Home Icon"
+                />
+                <p>Charging stations </p>
+              </li>
+            </NavLink>
+
+            <NavLink className="navlink-class" to="/stations-review">
+              <li className="line-wrapper">
+                <img
+                  className="listlogo-img"
+                  src="./charger.svg"
+                  alt="Home Icon"
+                />
+                <p>Chargers </p>
+              </li>
+            </NavLink>
 
             <li className="line-wrapper" onClick={toggleList}>
               <img

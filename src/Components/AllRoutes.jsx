@@ -8,6 +8,7 @@ import {
 } from "./AllFunctions";
 import Booking from "./Booking";
 import AppLayout from "./layout/AppLayout";
+import Users from "./Users";
 
 const AllRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AllRoutes = () => {
           </Route>
 
           <Route path="/booking" element={<Booking />}></Route>
+          <Route path="/users" element={<Users />}></Route>
         </Route>
       </Routes>
     </>
