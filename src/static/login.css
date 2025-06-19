@@ -54,7 +54,7 @@ span {
   padding-block: 15px;
 }
 
-img {
+.login-img {
   display: block;
   /* Make image a block element (allows margin auto) */
   margin: 0 auto;

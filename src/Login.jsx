@@ -83,6 +83,7 @@ export default function Login() {
             <>
               <div>
                 <img
+                  className="login-img"
                   src="https://mniladmin.hashtechy.space/static/media/logo.dca4fb32be8888f2e0fe20c4d69b193f.svg"
                   alt=""
                 />

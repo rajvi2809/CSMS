@@ -1,6 +1,9 @@
 import { createRoot } from "react-dom/client";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 import "./static/login.css";
-import "./static/dashboard.css";
+import "./static/sidebar.css";
+import "./static/booking.css";
 import App from "./App.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter } from "react-router-dom";
