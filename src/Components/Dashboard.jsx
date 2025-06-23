@@ -1,7 +1,9 @@
-export default function DashBoard() {
+export default function Dashboard() {
   return (
     <>
-      <h2 style={{ textAlign: "center" }}>Dashboard</h2>
+      <div className="heading-bar">
+        <h3 className="title-class">Dashboard</h3>
+      </div>
     </>
   );
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUser } from "./Slices/dataSlice";
+import { setUser } from "../Slices/dataSlice";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 

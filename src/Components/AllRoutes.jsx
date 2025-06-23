@@ -7,8 +7,11 @@ import {
   SlashRedirect,
 } from "./AllFunctions";
 import Booking from "./Booking";
-import AppLayout from "./layout/AppLayout";
+import AppLayout from "../layout/AppLayout";
 import Users from "./Users";
+import ChargingStations from "./ChargingStations";
+import StationReviews from "./StationReviews";
+import ChargerManagement from "./ChargerManagement";
 
 const AllRoutes = () => {
   return (
@@ -29,6 +32,15 @@ const AllRoutes = () => {
 
           <Route path="/booking" element={<Booking />}></Route>
           <Route path="/users" element={<Users />}></Route>
+          <Route
+            path="/charging-stations"
+            element={<ChargingStations />}
+          ></Route>
+          <Route path="stations-review" element={<StationReviews />}></Route>
+          <Route
+            path="charger-management"
+            element={<ChargerManagement />}
+          ></Route>
         </Route>
       </Routes>
     </>

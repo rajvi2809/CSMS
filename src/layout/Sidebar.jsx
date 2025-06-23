@@ -38,62 +38,118 @@ export default function Sidebar() {
         </div>
         <div className="list">
           <ul className="main-class">
-            <li className="line-wrapper">
-              <img className="listlogo-img" src="./home.svg" alt="Home Icon" />
-              <NavLink className="navlink-class" to="/dashboard">
-                DashBoard
-              </NavLink>
-            </li>
-
-            <NavLink className="navlink-class" to="/booking">
-              <li className="line-wrapper">
-                <img
-                  className="listlogo-img"
-                  src="./book.svg"
-                  alt="Home Icon"
-                />{" "}
-                <p>Booking Management</p>
-              </li>
+            <NavLink to="/dashboard">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./home.svg) no-repeat center",
+                      mask: "url(./home.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                  <p> DashBoard</p>
+                </li>
+              )}
             </NavLink>
 
-            <NavLink className="navlink-class" to="/users">
-              <li className="line-wrapper">
-                <img
-                  className="listlogo-img"
-                  src="./user.svg"
-                  alt="Home Icon"
-                />
-                <p>Users </p>
-              </li>
+            <NavLink to="/booking">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./book.svg) no-repeat center",
+                      mask: "url(./book.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />{" "}
+                  <p>Booking Management</p>
+                </li>
+              )}
             </NavLink>
 
-            <NavLink className="navlink-class" to="/charging-stations">
-              <li className="line-wrapper">
-                <img
-                  className="listlogo-img"
-                  src="./charge.svg"
-                  alt="Home Icon"
-                />
-                <p>Charging stations </p>
-              </li>
+            <NavLink to="/users">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./user.svg) no-repeat center",
+                      mask: "url(./user.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                  <p>Users </p>
+                </li>
+              )}
             </NavLink>
 
-            <NavLink className="navlink-class" to="/stations-review">
-              <li className="line-wrapper">
-                <img
-                  className="listlogo-img"
-                  src="./charger.svg"
-                  alt="Home Icon"
-                />
-                <p>Chargers </p>
-              </li>
+            <NavLink to="/charging-stations">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./charge.svg) no-repeat center",
+                      mask: "url(./charge.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                  <p>Charging stations </p>
+                </li>
+              )}
+            </NavLink>
+
+            <NavLink to="/stations-review">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./star.svg) no-repeat center",
+                      mask: "url(./star.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                    alt="Home Icon"
+                  />
+                  <p>Station Review </p>
+                </li>
+              )}
+            </NavLink>
+
+            <NavLink to="/charger-management">
+              {({ isActive }) => (
+                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
+                  <img
+                    style={{
+                      backgroundColor: "#adb5bd",
+                      WebkitMask: "url(./charger.svg) no-repeat center",
+                      mask: "url(./charger.svg) no-repeat center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                  <p>Chargers </p>
+                </li>
+              )}
             </NavLink>
 
             <li className="line-wrapper" onClick={toggleList}>
               <img
-                className="listlogo-img"
-                src="./settings.svg"
-                alt="Home Icon"
+                style={{
+                  backgroundColor: "#adb5bd",
+                  WebkitMask: "url(./settings.svg) no-repeat center",
+                  mask: "url(./settings.svg) no-repeat center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
               />
               <p>Settings</p>
               <img

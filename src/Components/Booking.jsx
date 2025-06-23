@@ -1,8 +1,9 @@
+import Button from "react-bootstrap/Button";
+import Collapse from "react-bootstrap/Collapse";
 import Select from "react-select";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import axios from "axios";
-import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 import { useEffect, useState } from "react";
@@ -18,6 +19,14 @@ const Options = [
   { value: "Maintenance", label: "Maintenance" },
 ];
 
+const OptionsFilter = [
+  { value: "Pending", label: "Pending" },
+  { value: "Ongoing", label: "Ongoing" },
+  { value: "Confirmed", label: "Confirmed" },
+  { value: "Completed", label: "Completed" },
+  { value: "Cancelled", label: "Cancelled" },
+];
+
 export default function Booking() {
   const [cookies] = useCookies(["accessToken"]);
   const [allData, setallData] = useState([]);
@@ -25,6 +34,7 @@ export default function Booking() {
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [topFilter, setTopFilter] = useState(false);
 
   const [selectBtn, setSelectBtn] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -33,6 +43,7 @@ export default function Booking() {
   const handleShow = () => setShow(true);
   const handleSelectOpen = () => setSelectBtn(true);
   const handleSelectClose = () => setSelectBtn(false);
+  const handleFilterOpt = () => setTopFilter(!topFilter);
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -66,9 +77,9 @@ export default function Booking() {
   }, [page]);
 
   const handleScrollEvent = async () => {
-    // console.log("Height=", document.documentElement.scrollHeight); //84227
-    // console.log("View port=", window.innerHeight); //288
-    // console.log("scroll=", document.documentElement.scrollTop);
+    console.log("Height=", document.documentElement.scrollHeight); //84227
+    console.log("View port=", window.innerHeight); //288
+    console.log("scroll=", document.documentElement.scrollTop);
 
     try {
       if (
@@ -91,17 +102,70 @@ export default function Booking() {
     <>
       <div className="heading-bar">
         <h3 className="title-class">Booking Management</h3>
-        <div className="filter-btn">
-          <button>
-            <img
-              style={{ height: "24px", width: "24px" }}
-              src="./filter.svg"
-              alt=""
-            />
+
+        <OverlayTrigger
+          placement="left"
+          overlay={<Tooltip id="button-tooltip">Filter</Tooltip>}
+        >
+          <button
+            className="filter-btn"
+            onClick={handleFilterOpt}
+            aria-controls="example-collapse-text"
+            aria-expanded={topFilter}
+          >
+            <img className="filter-img" />
           </button>
-        </div>
+        </OverlayTrigger>
       </div>
+
       <div className="content-wrapper">
+        <Collapse in={topFilter}>
+          <div className="filter-section" id="example-collapse-text">
+            <div
+              style={{
+                padding: "20px",
+                display: "flex",
+                gap: "20px",
+                marginBottom: "15px",
+              }}
+            >
+              <div className="input-group">
+                <img src="./search.svg" alt="" style={{ padding: "10px" }} />
+                <input
+                  type="text"
+                  placeholder="Search Here..."
+                  style={{ all: "unset" }}
+                />
+              </div>
+              <Select
+                className="custom-select"
+                placeholder="Select Reason"
+                onChange={setSelectedOption}
+                options={OptionsFilter}
+                styles={{
+                  control: (baseStyles, state) => ({
+                    ...baseStyles,
+                    maxHeight: "36px",
+                    minHeight: "36px",
+                    minWidth: "256px",
+                    borderColor: "rgb(222,226,230)",
+                    boxShadow: "none",
+                    "&:hover": {
+                      borderColor: "rgb(222,226,230)",
+                    },
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused
+                      ? "rgb(32,178,170)"
+                      : "white",
+                  }),
+                }}
+              ></Select>
+            </div>
+          </div>
+        </Collapse>
+
         <div className="margin-div">
           <div className="main-content">
             <table className="main-table">

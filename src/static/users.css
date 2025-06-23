@@ -1,0 +1,30 @@
+.main-table-users {
+  min-width: 860px;
+  width: auto;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.archive-btn {
+  all: unset;
+  background-color: rgba(246, 133, 31, 0.3);
+  padding: 4px 8px 4px 8px;
+  border-radius: 20%;
+}
+.popup-modal-img {
+  height: 35px;
+  width: 35px;
+  mask-image: url(./archive.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: #ffc107;
+  margin-bottom: 10px;
+}
+.details-section {
+  margin-left: 232px;
+  padding-top: 10px;
+  width: calc(100% - 232px);
+  background-color: #efefef;
+  display: flex;
+  align-items: center;
+}

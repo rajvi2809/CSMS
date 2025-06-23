@@ -14,15 +14,52 @@
 }
 .filter-btn {
   all: unset;
-  margin-left: auto;
-  height: 37.2px !important;
-  width: 37.2px !important;
-  padding: 6px;
-  margin-right: 20px;
+  /* background-color: red; */
+  height: 35px;
+  width: 35px;
+  display: inline-flex;
+  justify-content: center;
   align-items: center;
+  margin-right: 10px;
+  margin-left: auto;
+  border: 1px solid #20b2aa;
+  border-radius: 7px;
 }
+
+.filter-img {
+  mask-image: url(./filter.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: #20b2aa;
+  height: 24px;
+  width: 24px;
+}
+
 .filter-btn:hover {
-  background-color: red;
+  background-color: #20b2aa;
+}
+
+.filter-btn:hover .filter-img {
+  background-color: white;
+}
+
+.filter-section {
+  background-color: white;
+  border-radius: 5;
+  position: sticky;
+  top: 0px;
+  z-index: 1;
+}
+
+.input-group {
+  border: 0.6px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+  /* padding: 1px 5px 10px 5px; */
+  width: 290.2px;
+  height: 37px;
+  /* margin: 11px 10px 11px 16px; */
 }
 
 .title-class {

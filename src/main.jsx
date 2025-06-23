@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import "./static/users.css";
 import "./static/login.css";
 import "./static/sidebar.css";
 import "./static/booking.css";
