@@ -33,7 +33,7 @@ export default function Sidebar() {
     <>
       <aside className={`sidebar ${sideBar ? "open-menu" : ""}`}>
         <div className="logo-div sticky">
-          <img className="logo-img" src="./logomain.svg" alt="" />
+          <img className="logo-img" src="/logomain.svg" alt="" />
           {/* <sub className="sub-class">SUPER ADMIN</sub><small>v 1.0</small> */}
         </div>
         <div className="list">
@@ -44,8 +44,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./home.svg) no-repeat center",
-                      mask: "url(./home.svg) no-repeat center",
+                      WebkitMask: "url(/home.svg) no-repeat center",
+                      mask: "url(/home.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -61,8 +61,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./book.svg) no-repeat center",
-                      mask: "url(./book.svg) no-repeat center",
+                      WebkitMask: "url(/book.svg) no-repeat center",
+                      mask: "url(/book.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -78,8 +78,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./user.svg) no-repeat center",
-                      mask: "url(./user.svg) no-repeat center",
+                      WebkitMask: "url(/user.svg) no-repeat center",
+                      mask: "url(/user.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -95,8 +95,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./charge.svg) no-repeat center",
-                      mask: "url(./charge.svg) no-repeat center",
+                      WebkitMask: "url(/charge.svg) no-repeat center",
+                      mask: "url(/charge.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -112,8 +112,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./star.svg) no-repeat center",
-                      mask: "url(./star.svg) no-repeat center",
+                      WebkitMask: "url(/star.svg) no-repeat center",
+                      mask: "url(/star.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -130,8 +130,8 @@ export default function Sidebar() {
                   <img
                     style={{
                       backgroundColor: "#adb5bd",
-                      WebkitMask: "url(./charger.svg) no-repeat center",
-                      mask: "url(./charger.svg) no-repeat center",
+                      WebkitMask: "url(/charger.svg) no-repeat center",
+                      mask: "url(/charger.svg) no-repeat center",
                       WebkitMaskSize: "contain",
                       maskSize: "contain",
                     }}
@@ -145,15 +145,15 @@ export default function Sidebar() {
               <img
                 style={{
                   backgroundColor: "#adb5bd",
-                  WebkitMask: "url(./settings.svg) no-repeat center",
-                  mask: "url(./settings.svg) no-repeat center",
+                  WebkitMask: "url(/settings.svg) no-repeat center",
+                  mask: "url(/settings.svg) no-repeat center",
                   WebkitMaskSize: "contain",
                   maskSize: "contain",
                 }}
               />
               <p>Settings</p>
               <img
-                src="./sidearrow.svg"
+                src="/sidearrow.svg"
                 className={`${isOpen ? "rotated" : "arrow-icon"}`}
                 style={{ height: "30px", width: "15px", marginLeft: "auto" }}
               />

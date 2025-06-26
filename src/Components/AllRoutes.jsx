@@ -12,6 +12,7 @@ import Users from "./Users";
 import ChargingStations from "./ChargingStations";
 import StationReviews from "./StationReviews";
 import ChargerManagement from "./ChargerManagement";
+import UserDetails from "./UserDetails";
 
 const AllRoutes = () => {
   return (
@@ -32,6 +33,8 @@ const AllRoutes = () => {
 
           <Route path="/booking" element={<Booking />}></Route>
           <Route path="/users" element={<Users />}></Route>
+          <Route path="/user-details/:id" element={<UserDetails />}></Route>
+
           <Route
             path="/charging-stations"
             element={<ChargingStations />}

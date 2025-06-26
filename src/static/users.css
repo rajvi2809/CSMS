@@ -10,10 +10,17 @@
   padding: 4px 8px 4px 8px;
   border-radius: 20%;
 }
+
+.restore-btn {
+  all: unset;
+  background-color: #7474741a;
+  padding: 4px 8px 4px 8px;
+  border-radius: 20%;
+}
 .popup-modal-img {
   height: 35px;
   width: 35px;
-  mask-image: url(./archive.svg);
+  mask-image: url(/archive.svg);
   mask-repeat: no-repeat;
   mask-size: cover;
   mask-position: center;

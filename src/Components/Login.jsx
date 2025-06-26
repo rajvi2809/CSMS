@@ -53,7 +53,6 @@ export default function Login() {
       if (response?.data?.code === 200) {
         setCookie("accessToken", data?.accessToken, {
           path: "/",
-          maxAge: 60 * 60 * 24 * 7,
           secure: true,
           sameSite: "strict",
         });
