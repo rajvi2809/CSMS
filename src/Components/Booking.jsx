@@ -593,7 +593,6 @@ export default function Booking() {
                             fontSize: "12px",
                             position: "absolute",
                             display: "inline-flex",
-                            justifyContent: "center",
                             alignItems: "center",
                           }}
                         >

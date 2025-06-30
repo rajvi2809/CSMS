@@ -5,6 +5,7 @@ import "./static/login.css";
 import "./static/sidebar.css";
 import "./static/booking.css";
 import "./static/userDetails.css";
+import "./static/chargingStation.css";
 import App from "./App.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter } from "react-router-dom";

@@ -13,6 +13,7 @@ import ChargingStations from "./ChargingStations";
 import StationReviews from "./StationReviews";
 import ChargerManagement from "./ChargerManagement";
 import UserDetails from "./UserDetails";
+import StationDetails from "./StationDetails";
 
 const AllRoutes = () => {
   return (
@@ -38,6 +39,10 @@ const AllRoutes = () => {
           <Route
             path="/charging-stations"
             element={<ChargingStations />}
+          ></Route>
+          <Route
+            path="/charging-station-details/:id"
+            element={<StationDetails />}
           ></Route>
           <Route path="stations-review" element={<StationReviews />}></Route>
           <Route

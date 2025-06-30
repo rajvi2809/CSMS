@@ -39,10 +39,10 @@ export default function Users() {
   const handleNavigate = (userId) => {
     navigate(`/user-details/${userId}`);
   };
-  // const [pagination, setpagination] = useState({
-  //   current_page: 1,
-  //   total_pages: 1,
-  // });
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+  });
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -123,14 +123,11 @@ export default function Users() {
         archived_records: prevRecords.archived_records - 1,
       }));
 
-      setallData((prevData) => prevData.filter((user) => user.id !== userId));
-
       handleClose();
     } catch (error) {
       console.log("Error restoring user", error);
     }
   };
-
   const fetchdata = async () => {
     setLoading(true);
     try {
@@ -155,10 +152,16 @@ export default function Users() {
           },
         }
       );
+
       console.log(response?.data);
       const newData = response?.data?.data || [];
       setallData((prevData) => [...prevData, ...newData]);
       setRecords(response?.data?.record_counts || {});
+
+      setPagination({
+        current_page: response?.data?.pagination?.current_page || page,
+        total_pages: response?.data?.pagination?.total_pages || 1,
+      });
     } catch (error) {
       console.log("Error", error);
     }
@@ -167,31 +170,35 @@ export default function Users() {
 
   useEffect(() => {
     setallData([]);
-    // setPage(1);
     console.log(page);
   }, [filters]);
 
   useEffect(() => {
-    fetchdata();
+    if (page <= pagination.total_pages) {
+      fetchdata();
+    }
   }, [page, filters]);
 
   const handleScrollEvent = async () => {
     // console.log("Height=", document.documentElement.scrollHeight); //84227
     // console.log("View port=", window.innerHeight); //288
     // console.log("scroll=", document.documentElement.scrollTop);
-
     try {
+      //console.log("in try");
+      // console.log(pagination?.current_page);
       if (
         window.innerHeight + document.documentElement.scrollTop + 1 >=
         document.documentElement.scrollHeight
-        //    &&
-        // pagination.current_page < pagination.total_pages
       ) {
-        // console.log("Current page", pagination.current_page);
-        setPage((prev) => prev + 1);
+        //  console.log("in try if");
+        if (!loading && pagination?.current_page <= pagination?.total_pages) {
+          //console.log("object");
+          //console.log(pagination?.current_page);
+          setPage((prevPage) => prevPage + 1);
+        }
       }
     } catch (error) {
-      console.log(error);
+      console.log("Scroll error", error);
     }
   };
 
@@ -338,15 +345,13 @@ export default function Users() {
         <Card
           onClick={() => {
             setActiveCard("archived");
-            console.log("Filters", filters);
-            setFilters(
-              (prevFilter) => ({
-                ...prevFilter,
-                archived: true,
-                active: false,
-              }),
-              setPage(1)
-            );
+            //console.log("Filters", filters);
+            setFilters((prevFilter) => ({
+              ...prevFilter,
+              archived: true,
+              active: false,
+            }));
+            setPage(1);
           }}
           style={{
             width: "225px",
