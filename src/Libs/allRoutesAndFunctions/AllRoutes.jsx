@@ -1,19 +1,19 @@
 import { Route, Routes } from "react-router-dom";
-import Login from "../ui/Login";
-import Dashboard from "../ui/Dashboard";
+import Login from "../../Components/Login";
+import Dashboard from "../../Components/Dashboard";
 import {
   ProtectedRoutes,
   UnProtectedRoutes,
   SlashRedirect,
 } from "./AllFunctions";
-import Booking from "../ui/Booking";
+import Booking from "../../Components/Booking";
 import AppLayout from "../../Layout/AppLayout";
-import Users from "../ui/Users";
-import ChargingStations from "../ui/ChargingStations";
-import StationReviews from "../ui/StationReviews";
-import ChargerManagement from "../ui/ChargerManagement";
-import UserDetails from "../detailComponents/UserDetails";
-import StationDetails from "../detailComponents/StationDetails";
+import Users from "../../Components/Users";
+import ChargingStations from "../../Components/ChargingStations";
+import StationReviews from "../../Components/StationReviews";
+import ChargerManagement from "../../Components/ChargerManagement";
+import UserDetails from "../../Components/UserDetails";
+import StationDetails from "../../Components/StationDetails";
 
 const AllRoutes = () => {
   return (
