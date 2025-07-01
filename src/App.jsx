@@ -1,4 +1,4 @@
-import AllRoutes from "./libs/allRoutesAndFunctions/AllRoutes";
+import AllRoutes from "./libs/AllRoutes";
 import { ToastContainer, Slide } from "react-toastify";
 
 export default function App() {
