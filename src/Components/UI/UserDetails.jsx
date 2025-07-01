@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
+
 export default function UserDetails() {
   const { id } = useParams();
   const [cookies] = useCookies(["accessToken"]);

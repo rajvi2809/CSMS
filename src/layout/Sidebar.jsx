@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { removeUser } from "../Slices/dataSlice";
+import { removeUser } from "../Slices/userSlice";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { isAction } from "redux";

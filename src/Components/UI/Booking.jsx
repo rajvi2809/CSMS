@@ -77,9 +77,9 @@ export default function Booking() {
   }, [page]);
 
   const handleScrollEvent = async () => {
-    console.log("Height=", document.documentElement.scrollHeight); //84227
-    console.log("View port=", window.innerHeight); //288
-    console.log("scroll=", document.documentElement.scrollTop);
+    // console.log("Height=", document.documentElement.scrollHeight); //84227
+    // console.log("View port=", window.innerHeight); //288
+    // console.log("scroll=", document.documentElement.scrollTop);
 
     try {
       if (

@@ -9,6 +9,7 @@ import { useCookies } from "react-cookie";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
+import { useNavigate } from "react-router-dom";
 
 export default function ChargingStations() {
   const [topFilter, setTopFilter] = useState(false);
@@ -38,6 +39,8 @@ export default function ChargingStations() {
     total_pages: 1,
   });
 
+  const navigate = useNavigate();
+
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
@@ -61,7 +64,7 @@ export default function ChargingStations() {
       );
       console.log("response", response);
 
-      console.log(chargingId);
+      //console.log(chargingId);
       setallData((prevData) =>
         prevData.map((charging) =>
           charging.id === chargingId
@@ -106,11 +109,17 @@ export default function ChargingStations() {
       );
       console.log("Restore response", response);
 
-      setallData((prevData) =>
-        prevData.map((station) =>
+      setallData((prevData) => {
+        const updatedData = prevData.map((station) =>
           station.id === stationId ? { ...station, deletedAt: null } : station
-        )
-      );
+        );
+
+        if (activeCard === "archived") {
+          return updatedData.filter((station) => station.deletedAt !== null);
+        }
+
+        return updatedData;
+      });
 
       setRecords((prevRecords) => ({
         ...prevRecords,
@@ -124,8 +133,8 @@ export default function ChargingStations() {
     }
   };
 
-  const handleNavigate = (userId) => {
-    navigate(`/charging-station-details/${userId}`);
+  const handleNavigate = (stationId) => {
+    navigate(`/charging-station-details/${stationId}`);
   };
 
   const fetchdata = async () => {
@@ -153,31 +162,23 @@ export default function ChargingStations() {
         }
       );
 
+      console.log("Code", response?.data?.code);
       console.log(response?.data);
-      const newData = response?.data?.data || [];
-      setallData((prevData) => [...prevData, ...newData]);
-      setRecords(response?.data?.record_counts || {});
+      if (response?.data?.code === 200) {
+        const newData = response?.data?.data || [];
+        setallData((prevData) => [...prevData, ...newData]);
+        setRecords(response?.data?.record_counts || {});
 
-      setPagination({
-        current_page: response?.data?.pagination?.current_page || page,
-        total_pages: response?.data?.pagination?.total_pages || 1,
-      });
+        setPagination({
+          current_page: response?.data?.pagination?.current_page || page,
+          total_pages: response?.data?.pagination?.total_pages || 1,
+        });
+      }
     } catch (error) {
       console.log("Error", error);
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    setallData([]);
-    console.log(page);
-  }, [filters]);
-
-  useEffect(() => {
-    if (page <= pagination.total_pages) {
-      fetchdata();
-    }
-  }, [page, filters]);
 
   const handleScrollEvent = async () => {
     // console.log("Height=", document.documentElement.scrollHeight); //84227
@@ -201,6 +202,39 @@ export default function ChargingStations() {
       console.log("Scroll error", error);
     }
   };
+
+  const getTotalConnectors = (chargers) => {
+    let sum = 0;
+    chargers?.forEach((c) => {
+      sum += c.connectors?.length || 0;
+    });
+    return sum;
+  };
+
+  const getAvailableConnectors = (chargers) => {
+    //console.log("chargers", chargers);
+    let available = 0;
+    chargers?.forEach((c) => {
+      c.connectors?.forEach((conn) => {
+        if (conn.status === "Available") {
+          //console.log("availabe", conn.status);
+          available++;
+        }
+      });
+    });
+    return available;
+  };
+
+  useEffect(() => {
+    setallData([]);
+    //console.log(page);
+  }, [filters]);
+
+  useEffect(() => {
+    if (page <= pagination.total_pages) {
+      fetchdata();
+    }
+  }, [page, filters]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -259,10 +293,10 @@ export default function ChargingStations() {
               minWidth: "177px",
             }}
           >
-            Total Users
+            Total Stations
             <div
               style={{
-                marginLeft: "54px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -318,10 +352,10 @@ export default function ChargingStations() {
               minWidth: "196px",
             }}
           >
-            Active Users
+            Active Stations
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -374,10 +408,10 @@ export default function ChargingStations() {
               width: "207px",
             }}
           >
-            Archive Users
+            Archive Stations
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -422,7 +456,7 @@ export default function ChargingStations() {
         </Collapse>
         <div className="margin-div">
           <div className="main-content">
-            <table className="main-table">
+            <table className="main-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -436,37 +470,39 @@ export default function ChargingStations() {
               </thead>
               <tbody>
                 {allData.length === 0 ? (
-                  <td colSpan={6} style={{ padding: "100px 0" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%",
-                      }}
-                    >
-                      <img
-                        src="/noRecords.png"
-                        alt="No Records Found"
+                  <tr>
+                    <td colSpan={6} style={{ padding: "100px 0" }}>
+                      <div
                         style={{
-                          width: "170px",
-                          marginBottom: "20px",
-                          transform: "translateX(-20px)",
-                        }}
-                      />
-                      <p
-                        style={{
-                          fontSize: "20px",
-                          fontWeight: "600",
-                          color: "#000",
-                          transform: "translateX(-20px)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
                         }}
                       >
-                        No Records Found
-                      </p>
-                    </div>
-                  </td>
+                        <img
+                          src="/noRecords.png"
+                          alt="No Records Found"
+                          style={{
+                            width: "170px",
+                            marginBottom: "20px",
+                            transform: "translateX(-20px)",
+                          }}
+                        />
+                        <p
+                          style={{
+                            fontSize: "20px",
+                            fontWeight: "600",
+                            color: "#000",
+                            transform: "translateX(-20px)",
+                          }}
+                        >
+                          No Records Found
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : (
                   allData.map((data) => (
                     <tr key={data.id}>
@@ -479,6 +515,7 @@ export default function ChargingStations() {
                           textAlign: "left",
                         }}
                       >
+                        {/* console.log("dataID", data?.id) */}
                         {data?.station_name ?? "-"}
                         <br />
                         <span style={{ color: "rgb(125, 125, 125)" }}>
@@ -497,9 +534,11 @@ export default function ChargingStations() {
 
                       <td className="ports-td">
                         <div className="ports-div">
-                          <span style={{ color: "orange" }}>0</span>
+                          <span style={{ color: "orange" }}>
+                            {getAvailableConnectors(data?.chargers)}
+                          </span>
                           <span style={{ color: "rgb(125, 125, 125)" }}>
-                            /0
+                            /{getTotalConnectors(data?.chargers)}
                           </span>
                         </div>
                       </td>

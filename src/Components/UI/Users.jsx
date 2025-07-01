@@ -111,11 +111,19 @@ export default function Users() {
       );
       console.log("Restore response", response);
 
-      setallData((prevData) =>
-        prevData.map((user) =>
+      setallData((prevData) => {
+        // Update the user deletedAt to null
+        const updatedData = prevData.map((user) =>
           user.id === userId ? { ...user, deletedAt: null } : user
-        )
-      );
+        );
+
+        // If viewing archived users, remove the restored user from the list
+        if (activeCard === "archived") {
+          return updatedData.filter((user) => user.id !== userId);
+        }
+
+        return updatedData;
+      });
 
       setRecords((prevRecords) => ({
         ...prevRecords,
@@ -128,6 +136,7 @@ export default function Users() {
       console.log("Error restoring user", error);
     }
   };
+
   const fetchdata = async () => {
     setLoading(true);
     try {
@@ -154,14 +163,16 @@ export default function Users() {
       );
 
       console.log(response?.data);
-      const newData = response?.data?.data || [];
-      setallData((prevData) => [...prevData, ...newData]);
-      setRecords(response?.data?.record_counts || {});
+      if (response?.data?.code === 200) {
+        const newData = response?.data?.data || [];
+        setallData((prevData) => [...prevData, ...newData]);
+        setRecords(response?.data?.record_counts || {});
 
-      setPagination({
-        current_page: response?.data?.pagination?.current_page || page,
-        total_pages: response?.data?.pagination?.total_pages || 1,
-      });
+        setPagination({
+          current_page: response?.data?.pagination?.current_page || page,
+          total_pages: response?.data?.pagination?.total_pages || 1,
+        });
+      }
     } catch (error) {
       console.log("Error", error);
     }
