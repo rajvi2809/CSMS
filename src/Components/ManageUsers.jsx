@@ -1,3 +1,4 @@
+import Skeleton from "react-loading-skeleton";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
@@ -7,19 +8,17 @@ import Collapse from "react-bootstrap/Collapse";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton";
-import { useNavigate } from "react-router-dom";
-import "../static/users.css";
 
-export default function Users() {
+import "../Static/manageUsers.css";
+export default function ManageUsers() {
   const [topFilter, setTopFilter] = useState(false);
   const [allData, setallData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(false);
-  const [userToArchive, setuserToArchive] = useState(null);
-  const [userToRestore, setuserToRestore] = useState(null);
+  const [stationToArchive, setstationToArchive] = useState(null);
+  const [stationToRestore, setstationToRestore] = useState(null);
   const [activeCard, setActiveCard] = useState("total");
+  const [show, setShow] = useState(false);
   const [isArchive, setisArchive] = useState(false);
 
   const [records, setRecords] = useState({
@@ -33,11 +32,6 @@ export default function Users() {
     limit: 15,
     page: page,
   });
-  const navigate = useNavigate();
-
-  const handleNavigate = (userId) => {
-    navigate(`/user-details/${userId}`);
-  };
   const [pagination, setPagination] = useState({
     current_page: 1,
     total_pages: 1,
@@ -48,19 +42,19 @@ export default function Users() {
 
   const handleFilterOpt = () => setTopFilter(!topFilter);
 
-  const handleArchiveUser = async (userId) => {
+  const handleArchiveCharging = async (chargingId) => {
     try {
-      const response = await axios.delete(`enduser/delete/${userId}`, {
-        params: { id: userId },
+      const response = await axios.delete(`user/delete/${chargingId}`, {
+        params: { id: chargingId },
       });
       console.log("response", response);
 
-      console.log(userId);
+      //console.log(chargingId);
       setallData((prevData) =>
-        prevData.map((user) =>
-          user.id === userId
-            ? { ...user, deletedAt: new Date().toISOString() }
-            : user
+        prevData.map((charging) =>
+          charging.id === chargingId
+            ? { ...charging, deletedAt: new Date().toISOString() }
+            : charging
         )
       );
 
@@ -71,7 +65,9 @@ export default function Users() {
       }));
 
       if (activeCard === "active") {
-        setallData((prevData) => prevData.filter((user) => user.id !== userId));
+        setallData((prevData) =>
+          prevData.filter((charging) => charging.id !== chargingId)
+        );
       }
 
       handleClose();
@@ -80,20 +76,23 @@ export default function Users() {
     }
   };
 
-  const handleRestoreUser = async (userId) => {
+  const handleRestoreStation = async (stationId) => {
     try {
-      const response = await axios.delete(`enduser/restore/${userId}`, {});
+      // const token = cookies.accessToken;
+      // if (!token) {
+      //   console.log("No Token");
+      //   return;
+      // }
+      const response = await axios.delete(`user/restore/${stationId}`);
       console.log("Restore response", response);
 
       setallData((prevData) => {
-        // Update the user deletedAt to null
-        const updatedData = prevData.map((user) =>
-          user.id === userId ? { ...user, deletedAt: null } : user
+        const updatedData = prevData.map((station) =>
+          station.id === stationId ? { ...station, deletedAt: null } : station
         );
 
-        // If viewing archived users, remove the restored user from the list
         if (activeCard === "archived") {
-          return updatedData.filter((user) => user.id !== userId);
+          return updatedData.filter((station) => station.deletedAt !== null);
         }
 
         return updatedData;
@@ -114,7 +113,7 @@ export default function Users() {
   const fetchdata = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`enduser`, {
+      const response = await axios.get(`users`, {
         params: {
           limit: filters?.limit,
           page: page,
@@ -123,6 +122,7 @@ export default function Users() {
         },
       });
 
+      console.log("Code", response?.data?.code);
       console.log(response?.data);
       if (response?.data?.code === 200) {
         const newData = response?.data?.data || [];
@@ -162,10 +162,9 @@ export default function Users() {
       console.log("Scroll error", error);
     }
   };
-
   useEffect(() => {
     setallData([]);
-    console.log(page);
+    //console.log(page);
   }, [filters]);
 
   useEffect(() => {
@@ -182,7 +181,7 @@ export default function Users() {
   return (
     <>
       <div className="heading-bar">
-        <h3 className="title-class">Users</h3>
+        <h3 className="title-class">Manage Users</h3>
 
         <OverlayTrigger
           placement="left"
@@ -197,6 +196,18 @@ export default function Users() {
             <img className="filter-img" />
           </button>
         </OverlayTrigger>
+        <button
+          className="add-station-btn"
+          onClick={() => {
+            handleShowStation();
+            fetchOptions();
+            fetchAmenities();
+            // handleEditClick();
+          }}
+        >
+          <img className="add-icon"></img>
+          <p style={{ fontSize: "1rem" }}>Add Stations</p>
+        </button>
       </div>
       <div className="details-section">
         <Card
@@ -231,10 +242,10 @@ export default function Users() {
               minWidth: "177px",
             }}
           >
-            Total Users
+            Total Stations
             <div
               style={{
-                marginLeft: "54px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -290,10 +301,10 @@ export default function Users() {
               minWidth: "196px",
             }}
           >
-            Active Users
+            Active Stations
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -346,10 +357,10 @@ export default function Users() {
               width: "207px",
             }}
           >
-            Archive Users
+            Archive Stations
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -370,6 +381,7 @@ export default function Users() {
           </Card.Text>
         </Card>
       </div>
+
       <div className="content-wrapper">
         <Collapse in={topFilter}>
           <div className="filter-section" id="example-collapse-text">
@@ -394,65 +406,81 @@ export default function Users() {
         </Collapse>
         <div className="margin-div">
           <div className="main-content">
-            <table className="main-table-users">
+            <table className="main-table-manage" style={{ width: "100%" }}>
               <thead>
                 <tr>
-                  <th>Mobile</th>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Bookings</th>
-                  <th>No of Vehicles</th>
+                  <th>Phone No.</th>
+                  <th>Role</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {allData.length === 0 ? (
-                  <td colSpan={6} style={{ padding: "100px 0" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%",
-                      }}
-                    >
-                      <img
-                        src="/noRecords.png"
-                        alt="No Records Found"
+                  <tr>
+                    <td colSpan={6} style={{ padding: "100px 0" }}>
+                      <div
                         style={{
-                          width: "170px",
-                          marginBottom: "20px",
-                          transform: "translateX(-20px)",
-                        }}
-                      />
-                      <p
-                        style={{
-                          fontSize: "20px",
-                          fontWeight: "600",
-                          color: "#000",
-                          transform: "translateX(-20px)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
                         }}
                       >
-                        No Records Found
-                      </p>
-                    </div>
-                  </td>
+                        <img
+                          src="/noRecords.png"
+                          alt="No Records Found"
+                          style={{
+                            width: "170px",
+                            marginBottom: "20px",
+                            transform: "translateX(-20px)",
+                          }}
+                        />
+                        <p
+                          style={{
+                            fontSize: "20px",
+                            fontWeight: "600",
+                            color: "#000",
+                            transform: "translateX(-20px)",
+                          }}
+                        >
+                          No Records Found
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : (
-                  allData.map((data) => (
-                    <tr key={data.id}>
-                      <td>{data?.phone ?? "-"}</td>
-                      <td
-                        onClick={() => handleNavigate(data.id)}
-                        style={{ color: "#20b2aa", cursor: "pointer" }}
-                      >
-                        {data?.name ?? "-"}
-                      </td>
-                      <td>{data?.email ?? "-"}</td>
-                      <td>{data?.booking_count}</td>
-                      <td>{data?.vehicles_catalogues?.length}</td>
+                  allData.map((item) => (
+                    <tr key={item?.id}>
                       <td>
-                        {data?.deletedAt ? (
+                        {item?.firstname} {item?.lastname}
+                      </td>
+                      <td>{item?.email}</td>
+                      <td>{item?.phone}</td>
+                      <td>{item?.role}</td>
+
+                      <td
+                        style={{
+                          minWidth: "97px",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {!item?.deletedAt && (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={
+                              <Tooltip id="button-tooltip">Edit</Tooltip>
+                            }
+                          >
+                            <button className="edit-btn">
+                              <img src="./edit.svg" alt="" />
+                            </button>
+                          </OverlayTrigger>
+                        )}
+                        {item?.deletedAt ? (
                           <OverlayTrigger
                             placement="top"
                             overlay={
@@ -462,7 +490,7 @@ export default function Users() {
                             <button
                               className="restore-btn"
                               onClick={() => {
-                                setuserToRestore(data.id);
+                                setstationToRestore(item?.id);
                                 handleShow();
                                 setisArchive(true);
                               }}
@@ -480,7 +508,7 @@ export default function Users() {
                             <button
                               className="archive-btn"
                               onClick={() => {
-                                setuserToArchive(data.id);
+                                setstationToArchive(item?.id);
                                 handleShow();
                                 setisArchive(false);
                               }}
@@ -563,8 +591,8 @@ export default function Users() {
               <Button
                 style={{ backgroundColor: "#20b2aa", border: "none" }}
                 onClick={() => {
-                  if (userToRestore) {
-                    handleRestoreUser(userToRestore);
+                  if (stationToRestore) {
+                    handleRestoreStation(stationToRestore);
                     toast.success("User Restored Successfully!");
                     handleClose();
                   }
@@ -580,7 +608,7 @@ export default function Users() {
         ) : (
           <>
             <Modal.Body style={{ textAlign: "center" }}>
-              <img className="popup-modal-img"></img>
+              <img className="popup-modal-img-archive"></img>
               <br />
               <br />
               <h2 style={{ fontSize: "1.125rem" }}>
@@ -597,8 +625,8 @@ export default function Users() {
               <Button
                 style={{ backgroundColor: "#20b2aa", border: "none" }}
                 onClick={() => {
-                  if (userToArchive) {
-                    handleArchiveUser(userToArchive);
+                  if (stationToArchive) {
+                    handleArchiveCharging(stationToArchive);
                     toast.success("User Archived Successfully!");
                     handleClose();
                   }

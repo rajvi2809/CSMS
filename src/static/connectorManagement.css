@@ -1,0 +1,19 @@
+.main-table-connectors thead tr th {
+  border-color: #ececec;
+  color: #20b2aa;
+  font-weight: 500;
+  padding: 0 0.5rem 0.5rem;
+  white-space: nowrap;
+  font-size: 17px;
+}
+.main-table-connectors tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+thead th,
+tbody td {
+  padding: 10px 12px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 16px;
+}

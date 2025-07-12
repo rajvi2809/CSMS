@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../Slices/userSlice";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { isAction } from "redux";
+import "../static/sidebar.css";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -26,13 +26,16 @@ export default function Sidebar() {
     removeCookie("accessToken");
     navigate("/login");
   };
+  const handleNavigate = () => {
+    navigate("/dashboard");
+  };
 
   const users = useSelector((state) => state.users.users);
 
   return (
     <>
       <aside className={`sidebar ${sideBar ? "open-menu" : ""}`}>
-        <div className="logo-div sticky">
+        <div className="logo-div sticky" onClick={handleNavigate}>
           <img className="logo-img" src="/logomain.svg" alt="" />
           {/* <sub className="sub-class">SUPER ADMIN</sub><small>v 1.0</small> */}
         </div>
@@ -124,7 +127,7 @@ export default function Sidebar() {
               )}
             </NavLink>
 
-            <NavLink to="/charger-management">
+            {/* <NavLink to="/charger-management">
               {({ isActive }) => (
                 <li className={`line-wrapper ${isActive ? "active" : ""}`}>
                   <img
@@ -139,9 +142,13 @@ export default function Sidebar() {
                   <p>Chargers </p>
                 </li>
               )}
-            </NavLink>
+            </NavLink> */}
 
-            <li className="line-wrapper" onClick={toggleList}>
+            <li
+              className={`line-wrapper ${isOpen && "active"}`}
+              onClick={toggleList}
+              style={{ alignItems: "center" }}
+            >
               <img
                 style={{
                   backgroundColor: "#adb5bd",
@@ -161,14 +168,64 @@ export default function Sidebar() {
 
             {isOpen && (
               <ul>
-                <li className="inner-list">Brands</li>
-                <li className="inner-list">Vehicles</li>
-                <li className="inner-list">Connectors</li>
-                <li className="inner-list">Amenities</li>
-                <li className="inner-list">Contents</li>
-                <li className="inner-list">Fees</li>
-                <li className="inner-list">Manage Role</li>
-                <li className="inner-list">Manage Users</li>
+                <NavLink to="/brands-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Brands
+                    </li>
+                  )}
+                </NavLink>
+                <NavLink to="/vehicle-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Vehicles
+                    </li>
+                  )}
+                </NavLink>
+                <NavLink to="/connectors-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Connectors
+                    </li>
+                  )}
+                </NavLink>
+                <NavLink to="/amenities-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Amenities
+                    </li>
+                  )}
+                </NavLink>
+                <NavLink to="/content-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Contents
+                    </li>
+                  )}
+                </NavLink>
+                <NavLink to="/fee-management">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Fees
+                    </li>
+                  )}
+                </NavLink>
+
+                <NavLink to="/admin-role">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Manage Role
+                    </li>
+                  )}
+                </NavLink>
+
+                <NavLink to="/manage-permissions">
+                  {({ isActive }) => (
+                    <li className={`inner-list ${isActive ? "active" : ""}`}>
+                      Manage Users
+                    </li>
+                  )}
+                </NavLink>
               </ul>
             )}
           </ul>

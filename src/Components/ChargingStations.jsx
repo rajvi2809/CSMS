@@ -1,3 +1,6 @@
+import { Form, Field, Formik, ErrorMessage } from "formik";
+import * as yup from "yup";
+import Select from "react-select";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
@@ -5,15 +8,14 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import Collapse from "react-bootstrap/Collapse";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate } from "react-router-dom";
+import "../static/chargingStation.css";
 
 export default function ChargingStations() {
   const [topFilter, setTopFilter] = useState(false);
-  const [cookies] = useCookies(["accessToken"]);
   const [allData, setallData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,15 @@ export default function ChargingStations() {
   const [stationToRestore, setstationToRestore] = useState(null);
   const [activeCard, setActiveCard] = useState("total");
   const [isArchive, setisArchive] = useState(false);
+  const [showStation, setShowStation] = useState(false);
+
+  const [options, setOptions] = useState([]); //lists options
+  const [selectedOption, setSelectedOption] = useState([]); //has current selected option
+
+  const [optionsAmenities, setOptionsAmenities] = useState([]); //list of all Amenities
+  const [selectedAmenities, setSelectedAmenities] = useState([]); //current selected Amenities
+
+  const [selectedStation, setSelectedStation] = useState(null);
 
   const [records, setRecords] = useState({
     total_records: 0,
@@ -38,28 +49,137 @@ export default function ChargingStations() {
     current_page: 1,
     total_pages: 1,
   });
+  const validationSchema = yup.object().shape({
+    stationName: yup.string().required("Station name is required"),
+    address: yup.string().required("Address is required"),
+    charger: yup.array().min(1, "Please select at least one charger"),
+    amenity: yup.array().min(1, "Please select at least one amenity"),
+    latitude: yup.string().required("Latitude is required"),
+    longitude: yup.string().required("Longitude is required"),
+  });
+
+  const initialValues = (station = null) => {
+    if (station) {
+      return {
+        stationName: station.station_name || "",
+        address: station.address || "",
+        charger:
+          station.chargers?.map((c) => ({ value: c.id, label: c.id })) || [],
+        amenity:
+          station.amenities?.map((a) => ({
+            value: a.amenity_name,
+            label: a.amenity_name,
+            image: `https://api.mnil.hashtechy.space${a.amenity_img}`,
+          })) || [],
+        latitude: station.latitude || "",
+        longitude: station.longitude || "",
+      };
+    }
+    return {
+      stationName: "",
+      address: "",
+      charger: [],
+      amenity: [],
+      latitude: "",
+      longitude: "",
+    };
+  };
+
+  const handleSubmitForm = async (values, { setSubmitting }) => {
+    try {
+      const payload = {
+        station_name: values.stationName,
+        address: values.address,
+        charger_ids: values.charger.map((c) => c.value),
+        amenities: values.amenity.map((a) => a.value),
+        latitude: values.latitude,
+        longitude: values.longitude,
+      };
+
+      if (selectedStation) {
+        // Edit existing station
+        const response = await axios.patch(
+          `charging-station/update/${selectedStation.id}`,
+          payload
+        );
+        toast.success("Station updated successfully");
+
+        // Update local state
+        setallData((prevData) =>
+          prevData.map((station) =>
+            station.id === selectedStation.id
+              ? { ...station, ...response.data.data }
+              : station
+          )
+        );
+      } else {
+        // Add new station
+        const response = await axios.post("/charging-station/create", payload);
+        toast.success("Station created successfully");
+
+        // Add to local state
+        setallData((prevData) => [response.data.data, ...prevData]);
+      }
+
+      handleCloseStation();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(error.response?.data?.message || "An error occurred");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const navigate = useNavigate();
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const handleCloseStation = () => setShowStation(false);
+  const handleShowStation = () => setShowStation(true);
+
   const handleFilterOpt = () => setTopFilter(!topFilter);
+
+  // const handleEditClick = (station) => {
+  //   setSelectedStation(station);
+
+  //   const selectedChargers =
+  //     station.chargers?.map((c) => ({
+  //       value: c.id,
+  //       label: c.id,
+  //     })) || [];
+
+  //   setSelectedOption(selectedChargers);
+
+  //   setOptions((prevOptions) =>
+  //     prevOptions.filter(
+  //       (opt) => !selectedChargers.some((sel) => sel.value === opt.value)
+  //     )
+  //   );
+
+  //   const selectedAms =
+  //     station.amenities?.map((a) => ({
+  //       value: a.amenity_name,
+  //       label: a.amenity_name,
+  //       image: `https://api.mnil.hashtechy.space${a.amenity_img}`,
+  //     })) || [];
+
+  //   setSelectedAmenities(selectedAms);
+
+  //   setOptionsAmenities((prevOptions) =>
+  //     prevOptions.filter(
+  //       (opt) => !selectedAms.some((sel) => sel.value === opt.value)
+  //     )
+  //   );
+  // };
+  // console.log("station", selectedStation);
 
   const handleArchiveCharging = async (chargingId) => {
     try {
-      const token = cookies.accessToken;
-      if (!token) {
-        console.log("No Token");
-      }
       const response = await axios.delete(
-        `https://api.mnil.hashtechy.space/admin/charging-station/delete/${chargingId}`,
+        `charging-station/delete/${chargingId}`,
         {
           params: { id: chargingId },
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
         }
       );
       console.log("response", response);
@@ -93,19 +213,13 @@ export default function ChargingStations() {
 
   const handleRestoreStation = async (stationId) => {
     try {
-      const token = cookies.accessToken;
-      if (!token) {
-        console.log("No Token");
-        return;
-      }
+      // const token = cookies.accessToken;
+      // if (!token) {
+      //   console.log("No Token");
+      //   return;
+      // }
       const response = await axios.delete(
-        `https://api.mnil.hashtechy.space/admin/charging-station/restore/${stationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
-        }
+        `charging-station/restore/${stationId}`
       );
       console.log("Restore response", response);
 
@@ -140,27 +254,14 @@ export default function ChargingStations() {
   const fetchdata = async () => {
     setLoading(true);
     try {
-      // console.log("in try");
-      const token = cookies.accessToken;
-      if (!token) {
-        console.log("No Token");
-      }
-
-      const response = await axios.get(
-        `https://api.mnil.hashtechy.space/admin/charging-station`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
-          params: {
-            limit: filters?.limit,
-            page: page,
-            ...(filters.active ? { active: true } : {}),
-            ...(filters.archived ? { archived: true } : {}),
-          },
-        }
-      );
+      const response = await axios.get(`charging-station`, {
+        params: {
+          limit: filters?.limit,
+          page: page,
+          ...(filters.active ? { active: true } : {}),
+          ...(filters.archived ? { archived: true } : {}),
+        },
+      });
 
       console.log("Code", response?.data?.code);
       console.log(response?.data);
@@ -212,7 +313,6 @@ export default function ChargingStations() {
   };
 
   const getAvailableConnectors = (chargers) => {
-    //console.log("chargers", chargers);
     let available = 0;
     chargers?.forEach((c) => {
       c.connectors?.forEach((conn) => {
@@ -223,6 +323,57 @@ export default function ChargingStations() {
       });
     });
     return available;
+  };
+
+  const fetchOptions = async () => {
+    try {
+      const response = await axios.get("/charger/unassigned");
+      console.log("object", response?.data?.data);
+      const dynamicOptions = response?.data?.data.map((item) => ({
+        value: item.id,
+        label: item.id,
+      }));
+      setOptions(dynamicOptions);
+    } catch (error) {
+      console.error("Failed to fetch options", error);
+    }
+  };
+
+  const fetchAmenities = async () => {
+    try {
+      const response = await axios.get("/amenity");
+      console.log("object", response?.data?.data);
+      const dynamicOptions = response?.data?.data.map((item) => ({
+        value: item.amenity_name,
+        label: item.amenity_name,
+        image: `https://api.mnil.hashtechy.space${item?.amenity_img}`,
+      }));
+
+      console.log("object", dynamicOptions);
+      setOptionsAmenities(dynamicOptions);
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
+
+  const displayAmenityImg = ({ label, image }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <img src={image} alt={label} style={{ width: 24, height: 24 }} />
+      <p>{label}</p>
+    </div>
+  );
+
+  const handleChange = (option) => {
+    setSelectedOption(option || []);
+    setOptions((prevOptions) =>
+      prevOptions.filter((opt) => opt.value !== option.value)
+    );
+  };
+  const handleChangeAmenities = (option) => {
+    setSelectedAmenities(option || []);
+    setOptionsAmenities((prevOptions) =>
+      prevOptions.filter((opt) => opt.value !== option.value)
+    );
   };
 
   useEffect(() => {
@@ -259,6 +410,18 @@ export default function ChargingStations() {
             <img className="filter-img" />
           </button>
         </OverlayTrigger>
+        <button
+          className="add-station-btn"
+          onClick={() => {
+            handleShowStation();
+            fetchOptions();
+            fetchAmenities();
+            // handleEditClick();
+          }}
+        >
+          <img className="add-icon"></img>
+          <p style={{ fontSize: "1rem" }}>Add Stations</p>
+        </button>
       </div>
       <div className="details-section">
         <Card
@@ -432,6 +595,7 @@ export default function ChargingStations() {
           </Card.Text>
         </Card>
       </div>
+
       <div className="content-wrapper">
         <Collapse in={topFilter}>
           <div className="filter-section" id="example-collapse-text">
@@ -635,6 +799,247 @@ export default function ChargingStations() {
       </div>
 
       <Modal
+        show={showStation}
+        onHide={handleCloseStation}
+        backdrop="static"
+        keyboard={false}
+        style={{
+          backdropFilter: "blur(2px)",
+        }}
+        size="lg"
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            backgroundColor: "rgba(32, 178, 170, 0.05)",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "1.25rem",
+            }}
+          >
+            Update Charging Station
+          </Modal.Title>
+        </Modal.Header>
+        <Formik
+          validationSchema={validationSchema}
+          initialValues={{
+            ...initialValues,
+            charger: selectedOption,
+            amenity: selectedAmenities,
+          }}
+          onSubmit={handleSubmitForm}
+        >
+          {({ values, errors, setFieldValue }) => (
+            <Form>
+              {console.log("values console => ", values)}
+              {console.log("errors console => ", errors)}
+              <Modal.Body className="form-floating mb-3">
+                <div
+                  className="form-floating m_input"
+                  style={{ marginBottom: "16px" }}
+                >
+                  <Field
+                    type="text"
+                    className="form-control charging-input"
+                    placeholder="Charging Station Name"
+                    name="stationName"
+                    id="stationName"
+                  />
+                  <label htmlFor="stationName">
+                    Station Name<span>*</span>
+                  </label>
+                  <ErrorMessage
+                    name="stationName"
+                    component="div"
+                    className="modal-error"
+                  />
+                </div>
+
+                <div
+                  className="form-floating m_input"
+                  style={{ marginBottom: "16px" }}
+                >
+                  <Field
+                    as="textarea"
+                    className="form-control charging-input"
+                    placeholder="Charging Station Name"
+                    name="address"
+                    id="address"
+                  />
+                  <label htmlFor="address">
+                    Address<span>*</span>
+                  </label>
+                  <ErrorMessage
+                    name="address"
+                    component="div"
+                    className="modal-error"
+                  />
+                </div>
+
+                <div
+                  className="charging-input-3"
+                  style={{ marginBottom: "16px" }}
+                >
+                  <div className="charging-input-select m_input">
+                    <h6 style={{ marginBottom: "5px" }}>
+                      Charger<span>*</span>
+                    </h6>
+                    <Select
+                      isMulti
+                      options={options}
+                      name="charger"
+                      value={values.charger} // Use Formik's values
+                      onChange={(option) => {
+                        setSelectedOption(option || []);
+                        setFieldValue("charger", option || []); // Update Formik's state
+                        setOptions((prevOptions) =>
+                          prevOptions.filter(
+                            (opt) => opt.value !== option.value
+                          )
+                        );
+                      }}
+                      placeholder="Select Charger"
+                      styles={{
+                        control: (baseStyles) => ({
+                          ...baseStyles,
+                          minHeight: "36px",
+                          minWidth: "256px",
+                          borderColor: "rgb(222,226,230)",
+                          boxShadow: "none",
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isFocused
+                            ? "rgb(32,178,170)"
+                            : "white",
+                          color: state.isFocused ? "white" : "black",
+                          cursor: "pointer",
+                        }),
+                      }}
+                    />
+                    <ErrorMessage
+                      name="charger"
+                      component="div"
+                      className="modal-error"
+                    />
+                  </div>
+
+                  <div className="charging-input-select m_input">
+                    <h6 style={{ marginBottom: "5px" }}>
+                      Amenities<span>*</span>
+                    </h6>
+                    <Select
+                      isMulti
+                      options={optionsAmenities}
+                      name="amenity"
+                      value={values.amenity} // Use Formik's values
+                      onChange={(option) => {
+                        setSelectedAmenities(option || []);
+                        setFieldValue("amenity", option || []); // Update Formik's state
+                        setOptionsAmenities((prevOptions) =>
+                          prevOptions.filter(
+                            (opt) => opt.value !== option.value
+                          )
+                        );
+                      }}
+                      placeholder="Select Amenity"
+                      formatOptionLabel={displayAmenityImg}
+                      styles={{
+                        control: (baseStyles) => ({
+                          ...baseStyles,
+                          minHeight: "36px",
+                          minWidth: "256px",
+                          borderColor: "rgb(222,226,230)",
+                          boxShadow: "none",
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isFocused
+                            ? "rgb(32,178,170)"
+                            : "white",
+                          color: state.isFocused ? "white" : "black",
+                          cursor: "pointer",
+                        }),
+                      }}
+                    />
+                    <ErrorMessage
+                      name="amenity"
+                      component="div"
+                      className="modal-error"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="charging-input-4"
+                  style={{ marginBottom: "16px" }}
+                >
+                  <div className="form-floating charging-input-select m_input">
+                    <Field
+                      type="text"
+                      className="form-control"
+                      placeholder="Latitude"
+                      name="latitude"
+                      id="latitude"
+                    />
+                    <label htmlFor="latitude">
+                      Latitude<span>*</span>
+                    </label>
+                    <ErrorMessage
+                      name="latitude"
+                      component="div"
+                      className="modal-error"
+                    />
+                  </div>
+
+                  <div className="form-floating charging-input-select m_input">
+                    <Field
+                      type="text"
+                      className="form-control"
+                      placeholder="Longitude"
+                      name="longitude"
+                      id="longitude"
+                    />
+                    <label htmlFor="longitude">
+                      Longitude<span>*</span>
+                    </label>
+                    <ErrorMessage
+                      name="longitude"
+                      component="div"
+                      className="modal-error"
+                    />
+                  </div>
+                </div>
+
+                {/* <div className="modal-map">Map</div> */}
+              </Modal.Body>
+
+              <Modal.Footer>
+                <Button
+                  style={{
+                    backgroundColor: "#e3e3e3",
+                    color: "black",
+                    border: "none",
+                  }}
+                  onClick={handleCloseStation}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  style={{ backgroundColor: "#20b2aa", border: "none" }}
+                >
+                  Add
+                </Button>
+              </Modal.Footer>
+            </Form>
+          )}
+        </Formik>
+      </Modal>
+
+      <Modal
         show={show}
         onHide={handleClose}
         backdrop="static"
@@ -647,7 +1052,7 @@ export default function ChargingStations() {
         {isArchive ? (
           <>
             <Modal.Body style={{ textAlign: "center" }}>
-              <img className="popup-modal-img"></img>
+              <img className="popup-modal-img-restore"></img>
               <br />
               <br />
               <h2 style={{ fontSize: "1.125rem" }}>

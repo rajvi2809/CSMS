@@ -64,15 +64,15 @@
 
 .title-class {
   font-size: 20px;
-  padding: 25px 0px 20px 10px;
-  font-weight: 500;
+  margin-bottom: 0;
   text-transform: capitalize;
+  font-weight: 600;
 }
 
 .content-wrapper {
   margin-left: 232px;
   width: calc(100% - 232px);
-  background-color: #efefef;
+  background-color: #f8f9fa;
   padding: 10px 17px 9px 9px;
 }
 
@@ -93,7 +93,7 @@ table {
 
 thead th,
 tbody td {
-  padding: 12px 12px;
+  padding: 9px 9px;
   text-align: center;
   vertical-align: middle;
 }
@@ -125,7 +125,7 @@ thead th {
 } */
 
 .main-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #f9f9f9;
 }
 
 .margin-div {
@@ -206,7 +206,7 @@ thead th {
 }
 
 .popup-price-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #f9f9f9;
 }
 .popup-backdrop {
   position: fixed;

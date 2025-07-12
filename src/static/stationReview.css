@@ -1,0 +1,95 @@
+.approved-status {
+  background-color: #e8fff3;
+  border: 1px solid #50cd89;
+  color: #50cd89;
+  border-radius: 5px;
+  width: 90px;
+  height: 30px;
+}
+
+.rejected-status {
+  background-color: #fff5f8;
+  border: 1px solid #f1416c;
+  color: #f1416c;
+  border-radius: 5px;
+  width: 90px;
+  height: 30px;
+}
+
+.pending-status {
+  background-color: #fff8dd;
+  border: 1px solid #f6c000;
+  color: #f6c000;
+  border-radius: 5px;
+  width: 90px;
+  height: 30px;
+}
+.approved-btn {
+  all: unset;
+  height: 26px;
+  width: 26px;
+  background-color: #ff00001a;
+  border-radius: 5px;
+}
+.approved-img {
+  height: 16px;
+  width: 16px;
+  object-fit: contain;
+}
+.approved-btn:hover {
+  background-color: rgba(255, 0, 0, 0.4);
+}
+.reject-btn {
+  all: unset;
+  height: 26px;
+  width: 26px;
+  background-color: #20b2aa1a;
+  border-radius: 5px;
+}
+.reject-img {
+  height: 16px;
+  width: 16px;
+  object-fit: contain;
+}
+.reject-btn:hover {
+  background-color: rgba(32, 178, 170, 0.5);
+}
+.ratings-star-filled {
+  mask-image: url("/filledStar.svg");
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  background-color: #ffe234;
+  height: 21px;
+  width: 21px;
+}
+
+.ratings-star-empty {
+  mask-image: url("/emptyStar.svg");
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  background-color: #ffe234;
+  height: 21px;
+  width: 21px;
+}
+.main-table-station {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.main-table-station tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.main-table-station td,
+.main-table-station th {
+  padding: 8px 7px !important;
+}
+.modal-title-img {
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  background-color: #ffc107;
+  mask-image: url("/error.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: cover;
+}

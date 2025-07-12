@@ -33,6 +33,7 @@ body {
   padding-left: 28px;
   border-bottom: 1px solid #3c3e3e;
   z-index: 1;
+  cursor: pointer;
 }
 
 .logo-img {
@@ -127,6 +128,10 @@ a {
 }
 
 .inner-list:hover {
+  color: #20b2aa;
+}
+
+.inner-list.active {
   color: #20b2aa;
 }
 

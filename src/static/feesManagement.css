@@ -1,0 +1,36 @@
+.edit-icon {
+  mask-image: url(./edit.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: white;
+  height: 16px;
+  width: 16px;
+  margin-left: 6px;
+}
+
+.main-table-fees {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.main-table-fees tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.main-table-fees td,
+.main-table-fees th {
+  padding: 10px 9px;
+}
+
+.m_input:has(.modal-error) .charging-input1 {
+  background-image: url("/error.svg");
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: calc(100% - 5px) center;
+  border: 1px solid red;
+}
+
+.m_input:has(.modal-error) .charging-input1:focus {
+  box-shadow: 0 0 0 2px #ef4444;
+  outline: none;
+}

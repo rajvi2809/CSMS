@@ -1,0 +1,23 @@
+.add-bulk-btn {
+  all: unset;
+  margin-right: 10px;
+  background-color: #ffc107;
+  color: black;
+  width: 159px;
+  height: 38px;
+  border-radius: 7px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+.add-bulk-icon {
+  mask-image: url(./add.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: black;
+  height: 26px;
+  width: 26px;
+  margin-left: 6px;
+}

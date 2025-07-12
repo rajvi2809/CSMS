@@ -1,6 +1,6 @@
 .main-table-users {
   min-width: 860px;
-  width: auto;
+  width: 100%;
   border-collapse: collapse;
   font-size: 16px;
 }
@@ -17,6 +17,9 @@
   padding: 4px 8px 4px 8px;
   border-radius: 20%;
 }
+.archive-btn:hover {
+  background-color: #f6851f80;
+}
 .popup-modal-img {
   height: 35px;
   width: 35px;
@@ -31,7 +34,7 @@
   margin-left: 232px;
   padding-top: 10px;
   width: calc(100% - 232px);
-  background-color: #efefef;
+  background-color: #f8f9fa;
   display: flex;
   align-items: center;
 }

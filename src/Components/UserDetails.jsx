@@ -1,13 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
+import "../static/userDetails.css";
 
 export default function UserDetails() {
   const { id } = useParams();
-  const [cookies] = useCookies(["accessToken"]);
   const [allData, setallData] = useState([]);
   const [allDataList, setallDataList] = useState([]);
   const navigate = useNavigate();
@@ -17,37 +16,23 @@ export default function UserDetails() {
 
   const fetchdata = async () => {
     try {
-      const token = cookies.accessToken;
-      if (!token) {
-        console.log("No Token");
-      }
+      // const token = cookies.accessToken;
+      // if (!token) {
+      //   console.log("No Token");
+      // }
 
-      const response = await axios.get(
-        `https://api.mnil.hashtechy.space/admin/enduser`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
-          params: {
-            enduser_id: id,
-          },
-        }
-      );
+      const response = await axios.get(`enduser`, {
+        params: {
+          enduser_id: id,
+        },
+      });
       console.log(response?.data);
 
-      const responseList = await axios.get(
-        `https://api.mnil.hashtechy.space/admin/booking`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
-          params: {
-            user_id: id,
-          },
-        }
-      );
+      const responseList = await axios.get(`booking`, {
+        params: {
+          user_id: id,
+        },
+      });
 
       const newData = response?.data?.data || [];
       setallData(newData);
@@ -336,7 +321,6 @@ export default function UserDetails() {
                                   fontSize: "12px",
                                   position: "absolute",
                                   display: "inline-flex",
-                                  alignItems: "center",
                                 }}
                               >
                                 {item?.charger_position.charAt(0).toUpperCase()}

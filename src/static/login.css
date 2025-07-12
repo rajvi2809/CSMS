@@ -62,33 +62,27 @@ span {
   margin-bottom: 0px;
 }
 
-.input {
+.input-login {
   width: 350px;
   height: 50px;
   padding: 5px;
   margin: 5px;
 }
-
-.eye-class {
-  width: 340px;
-  background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBYIz1tmegE21GwmvxxLECSw1n0Zxkgbs87A&s");
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-  background-position: right center;
-}
+/*  */
 
 .set-icon {
   position: absolute;
-  right: 10px;
+  height: 20px;
+  width: 20px;
+  right: 5px;
   top: 30px;
   transform: translateY(-50%) translateX(-130%);
   cursor: pointer;
   color: #888;
 }
 
-input:focus {
+input-login:focus {
   box-shadow: 0 0 0 2px #10b981;
-  /* or any green shade */
   outline: none;
 }
 
@@ -134,28 +128,27 @@ input:focus {
   color: red;
 }
 
-.m_input:has(.error-div) input {
-  border: 1px solid red !important;
-  background-image: url("https://img.icons8.com/?size=100&id=zHqriwlFOo3J&format=png&color=000000");
+.m_input:has(.error-div) .input-login {
+  background-image: url("/error.svg");
+  border: 1px solid red;
   background-repeat: no-repeat;
   background-size: 20px 20px;
-  background-position: calc(100% - 10px) center;
+  background-position: calc(100% - 5px) center;
 }
 
-.m_input:has(.error-div) input:focus {
+.m_input:has(.error-div) .input-login:focus {
   box-shadow: 0 0 0 2px #ef4444;
   outline: none;
 }
 
-.m_input:not(:has(.error-div)) input:not(:placeholder-shown) {
-  border: 1px solid green !important;
-  background-image: url("https://img.icons8.com/?size=100&id=15427&format=png&color=000000");
+.m_input:not(:has(.error-div)) .input-login:not(:placeholder-shown) {
+  background-image: url("/valid.svg");
   background-repeat: no-repeat;
   background-size: 20px 20px;
-  background-position: calc(100% - 10px) center;
+  background-position: calc(100% - 5px) center;
 }
 
-.m_input:not(:has(.error-div)) input:not(:placeholder-shown):focus {
+.m_input:not(:has(.error-div)) .input-login:not(:placeholder-shown):focus {
   box-shadow: 0 0 0 2px #22c55e;
   outline: none;
 }

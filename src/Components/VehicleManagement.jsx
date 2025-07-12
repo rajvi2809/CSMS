@@ -1,120 +1,38 @@
-import Button from "react-bootstrap/Button";
+import Skeleton from "react-loading-skeleton";
+import Collapse from "react-bootstrap/Collapse";
 import { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import Collapse from "react-bootstrap/Collapse";
 import axios from "axios";
-import Modal from "react-bootstrap/Modal";
-import { toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton";
-import { useNavigate } from "react-router-dom";
-import "../static/users.css";
-
-export default function Users() {
-  const [topFilter, setTopFilter] = useState(false);
+import "../Static/vehiclemanagement.css";
+export default function VehicleManagement() {
   const [allData, setallData] = useState([]);
+  const [topFilter, setTopFilter] = useState(false);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(false);
-  const [userToArchive, setuserToArchive] = useState(null);
-  const [userToRestore, setuserToRestore] = useState(null);
   const [activeCard, setActiveCard] = useState("total");
-  const [isArchive, setisArchive] = useState(false);
-
-  const [records, setRecords] = useState({
-    total_records: 0,
-    active_records: 0,
-    archived_records: 0,
-  });
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     archived: false,
     active: false,
     limit: 15,
     page: page,
   });
-  const navigate = useNavigate();
-
-  const handleNavigate = (userId) => {
-    navigate(`/user-details/${userId}`);
-  };
   const [pagination, setPagination] = useState({
     current_page: 1,
     total_pages: 1,
   });
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const handleFilterOpt = () => setTopFilter(!topFilter);
-
-  const handleArchiveUser = async (userId) => {
-    try {
-      const response = await axios.delete(`enduser/delete/${userId}`, {
-        params: { id: userId },
-      });
-      console.log("response", response);
-
-      console.log(userId);
-      setallData((prevData) =>
-        prevData.map((user) =>
-          user.id === userId
-            ? { ...user, deletedAt: new Date().toISOString() }
-            : user
-        )
-      );
-
-      setRecords((prevRecords) => ({
-        ...prevRecords,
-        active_records: prevRecords.active_records - 1,
-        archived_records: prevRecords.archived_records + 1,
-      }));
-
-      if (activeCard === "active") {
-        setallData((prevData) => prevData.filter((user) => user.id !== userId));
-      }
-
-      handleClose();
-    } catch (error) {
-      console.log("Error", error);
-    }
-  };
-
-  const handleRestoreUser = async (userId) => {
-    try {
-      const response = await axios.delete(`enduser/restore/${userId}`, {});
-      console.log("Restore response", response);
-
-      setallData((prevData) => {
-        // Update the user deletedAt to null
-        const updatedData = prevData.map((user) =>
-          user.id === userId ? { ...user, deletedAt: null } : user
-        );
-
-        // If viewing archived users, remove the restored user from the list
-        if (activeCard === "archived") {
-          return updatedData.filter((user) => user.id !== userId);
-        }
-
-        return updatedData;
-      });
-
-      setRecords((prevRecords) => ({
-        ...prevRecords,
-        active_records: prevRecords.active_records + 1,
-        archived_records: prevRecords.archived_records - 1,
-      }));
-
-      handleClose();
-    } catch (error) {
-      console.log("Error restoring user", error);
-    }
-  };
+  const [records, setRecords] = useState({
+    total_records: 0,
+    active_records: 0,
+    archived_records: 0,
+  });
 
   const fetchdata = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`enduser`, {
+      const response = await axios.get(`/vehicles`, {
         params: {
           limit: filters?.limit,
           page: page,
@@ -123,6 +41,7 @@ export default function Users() {
         },
       });
 
+      console.log("Code", response?.data?.code);
       console.log(response?.data);
       if (response?.data?.code === 200) {
         const newData = response?.data?.data || [];
@@ -162,10 +81,11 @@ export default function Users() {
       console.log("Scroll error", error);
     }
   };
+  const handleFilterOpt = () => setTopFilter(!topFilter);
 
   useEffect(() => {
     setallData([]);
-    console.log(page);
+    //console.log(page);
   }, [filters]);
 
   useEffect(() => {
@@ -182,7 +102,7 @@ export default function Users() {
   return (
     <>
       <div className="heading-bar">
-        <h3 className="title-class">Users</h3>
+        <h3 className="title-class">Vehicle Management</h3>
 
         <OverlayTrigger
           placement="left"
@@ -197,7 +117,17 @@ export default function Users() {
             <img className="filter-img" />
           </button>
         </OverlayTrigger>
+        <button className="add-station-btn">
+          <img className="add-icon"></img>
+          <p style={{ fontSize: "1rem" }}>Add Vehicle</p>
+        </button>
+
+        <button className="add-bulk-btn">
+          <img className="add-bulk-icon"></img>
+          <p style={{ fontSize: "1rem" }}>Bulk Upload</p>
+        </button>
       </div>
+
       <div className="details-section">
         <Card
           onClick={() => {
@@ -228,13 +158,13 @@ export default function Users() {
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
-              minWidth: "177px",
+              minWidth: "179px",
             }}
           >
-            Total Users
+            Total Vehicles
             <div
               style={{
-                marginLeft: "54px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -290,10 +220,10 @@ export default function Users() {
               minWidth: "196px",
             }}
           >
-            Active Users
+            Active Vehicles
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -346,10 +276,10 @@ export default function Users() {
               width: "207px",
             }}
           >
-            Archive Users
+            Archive Vehicles
             <div
               style={{
-                marginLeft: "62px",
+                marginLeft: "33px",
                 backgroundColor: "#f5f5f5",
                 borderRadius: "50px",
                 height: "35px",
@@ -394,105 +324,130 @@ export default function Users() {
         </Collapse>
         <div className="margin-div">
           <div className="main-content">
-            <table className="main-table-users">
+            <table className="main-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
-                  <th>Mobile</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Bookings</th>
-                  <th>No of Vehicles</th>
+                  <th>Details</th>
+                  <th>Battery Capacity(kW/h)</th>
+                  <th>Battery Voltage(v)</th>
+                  <th>Connectors</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {allData.length === 0 ? (
-                  <td colSpan={6} style={{ padding: "100px 0" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%",
-                      }}
-                    >
-                      <img
-                        src="/noRecords.png"
-                        alt="No Records Found"
+                {allData.map((item) => (
+                  <tr key={item?.id}>
+                    <td>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <div>
+                          <img
+                            src={
+                              item?.vehicle_img?.startsWith("/")
+                                ? `https://api.mnil.hashtechy.space${item.vehicle_img}`
+                                : item?.vehicle_img
+                            }
+                            alt=""
+                            style={{
+                              height: "70px",
+                              width: "70px",
+                              objectFit: "contain",
+                              border: "1px solid #e9ecef",
+                              borderRadius: ".375rem",
+                            }}
+                          />
+                        </div>
+                        <div
+                          style={{ textAlign: "left", alignContent: "center" }}
+                        >
+                          {" "}
+                          {item?.brand?.brand_name} {item?.model}
+                          <br />
+                          {item?.vehicle_type}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>{item?.battery_capacity}</td>
+
+                    <td>{item?.battery_voltage}</td>
+
+                    <td>
+                      <div
                         style={{
-                          width: "170px",
-                          marginBottom: "20px",
-                          transform: "translateX(-20px)",
-                        }}
-                      />
-                      <p
-                        style={{
-                          fontSize: "20px",
-                          fontWeight: "600",
-                          color: "#000",
-                          transform: "translateX(-20px)",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%", // Ensures vertical centering works
+                          minHeight: "80px", // Minimum height to prevent squishing
                         }}
                       >
-                        No Records Found
-                      </p>
-                    </div>
-                  </td>
-                ) : (
-                  allData.map((data) => (
-                    <tr key={data.id}>
-                      <td>{data?.phone ?? "-"}</td>
-                      <td
-                        onClick={() => handleNavigate(data.id)}
-                        style={{ color: "#20b2aa", cursor: "pointer" }}
+                        {item?.connectors?.map((connector) => (
+                          <div
+                            key={connector.id}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              textAlign: "center",
+                            }}
+                          >
+                            <img
+                              style={{
+                                height: "40px",
+                                width: "40px",
+                                objectFit: "contain",
+                              }}
+                              src={`https://api.mnil.hashtechy.space${connector?.connector_img}`}
+                              alt={connector?.connector_type}
+                            />
+                            <div style={{ marginTop: "4px" }}>
+                              <span
+                                style={{ color: "black", fontSize: "12px" }}
+                              >
+                                {connector?.connector_type}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+
+                    <td>
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
                       >
-                        {data?.name ?? "-"}
-                      </td>
-                      <td>{data?.email ?? "-"}</td>
-                      <td>{data?.booking_count}</td>
-                      <td>{data?.vehicles_catalogues?.length}</td>
-                      <td>
-                        {data?.deletedAt ? (
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={
-                              <Tooltip id="button-tooltip">Restore</Tooltip>
-                            }
-                          >
-                            <button
-                              className="restore-btn"
-                              onClick={() => {
-                                setuserToRestore(data.id);
-                                handleShow();
-                                setisArchive(true);
-                              }}
-                            >
-                              <img src="./restore.svg" alt="" />
-                            </button>
-                          </OverlayTrigger>
-                        ) : (
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={
-                              <Tooltip id="button-tooltip">Archive</Tooltip>
-                            }
-                          >
-                            <button
-                              className="archive-btn"
-                              onClick={() => {
-                                setuserToArchive(data.id);
-                                handleShow();
-                                setisArchive(false);
-                              }}
-                            >
-                              <img src="./archive.svg" alt="" />
-                            </button>
-                          </OverlayTrigger>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
+                        <button
+                          className="edit-btn"
+                          onClick={() => {
+                            setModalType("edit");
+                            setaddAmenity(false);
+                            setEditAmenityID(item?.id);
+                            handleShow();
+                          }}
+                        >
+                          <img src="./edit.svg" alt="" />
+                        </button>
+                      </OverlayTrigger>
+
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip id="button-tooltip">Delete</Tooltip>}
+                      >
+                        <button
+                          className="archive-btn"
+                          onClick={() => {
+                            handleShow();
+                            setModalType("delete");
+                            setdeleteAmenityID(item?.id);
+                          }}
+                        >
+                          <img src="./archive.svg" alt="" />
+                        </button>
+                      </OverlayTrigger>
+                    </td>
+                  </tr>
+                ))}
                 {loading && (
                   <tr>
                     <td>
@@ -532,87 +487,6 @@ export default function Users() {
           </div>
         </div>
       </div>
-
-      <Modal
-        show={show}
-        onHide={handleClose}
-        backdrop="static"
-        keyboard={false}
-        centered
-        style={{
-          backdropFilter: "blur(2px)",
-        }}
-      >
-        {isArchive ? (
-          <>
-            <Modal.Body style={{ textAlign: "center" }}>
-              <img className="popup-modal-img-restore"></img>
-              <br />
-              <br />
-              <h2 style={{ fontSize: "1.125rem" }}>
-                <b> Are you sure you want to Restore this User ?</b>
-              </h2>
-            </Modal.Body>
-            <Modal.Footer
-              style={{
-                marginTop: "0px",
-                borderTop: "none",
-                justifyContent: "center",
-              }}
-            >
-              <Button
-                style={{ backgroundColor: "#20b2aa", border: "none" }}
-                onClick={() => {
-                  if (userToRestore) {
-                    handleRestoreUser(userToRestore);
-                    toast.success("User Restored Successfully!");
-                    handleClose();
-                  }
-                }}
-              >
-                Yes
-              </Button>
-              <Button variant="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Modal.Footer>
-          </>
-        ) : (
-          <>
-            <Modal.Body style={{ textAlign: "center" }}>
-              <img className="popup-modal-img"></img>
-              <br />
-              <br />
-              <h2 style={{ fontSize: "1.125rem" }}>
-                <b> Are you sure you want to Archive this User ?</b>
-              </h2>
-            </Modal.Body>
-            <Modal.Footer
-              style={{
-                marginTop: "0px",
-                borderTop: "none",
-                justifyContent: "center",
-              }}
-            >
-              <Button
-                style={{ backgroundColor: "#20b2aa", border: "none" }}
-                onClick={() => {
-                  if (userToArchive) {
-                    handleArchiveUser(userToArchive);
-                    toast.success("User Archived Successfully!");
-                    handleClose();
-                  }
-                }}
-              >
-                Yes
-              </Button>
-              <Button variant="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Modal.Footer>
-          </>
-        )}
-      </Modal>
     </>
   );
 }

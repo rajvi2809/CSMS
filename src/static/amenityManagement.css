@@ -1,0 +1,14 @@
+.add-amenity-btn {
+  all: unset;
+  margin-right: 10px;
+  margin-left: auto;
+  background-color: rgb(32, 178, 170);
+  color: white;
+  width: 159px;
+  height: 38px;
+  border-radius: 7px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}

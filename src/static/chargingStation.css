@@ -17,3 +17,87 @@
   margin-right: 5px;
   border-radius: 20%;
 }
+.edit-btn:hover {
+  background-color: #20b2aa80;
+}
+.add-station-btn {
+  all: unset;
+  margin-right: 10px;
+  background-color: rgb(32, 178, 170);
+  color: white;
+  width: 159px;
+  height: 36px;
+  border-radius: 7px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+.add-icon {
+  mask-image: url(./add.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: white;
+  height: 26px;
+  width: 26px;
+  margin-left: 6px;
+}
+.chraging-input {
+  border: 1px solid black;
+  width: 766px;
+  height: 52px;
+  border-radius: 5px;
+}
+.charging-input-3 {
+  display: flex;
+  width: 766px;
+  gap: 12px;
+}
+
+.charging-input-4 {
+  margin-top: 20px;
+  display: flex;
+  width: 766px;
+  gap: 12px;
+}
+.charging-input-select {
+  width: 49%;
+}
+.modal-map {
+  margin-top: 20px;
+  width: 766px;
+  height: 300px;
+  background-color: rgb(218, 208, 208);
+}
+.modal-error {
+  color: red;
+  margin-bottom: 20px;
+}
+
+.m_input:has(.modal-error) .charging-input {
+  background-image: url("/error.svg");
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: calc(100% - 5px) center;
+  border: 1px solid red;
+}
+
+.m_input:has(.modal-error) .charging-input:focus {
+  box-shadow: 0 0 0 2px #ef4444;
+  outline: none;
+}
+
+.m_input:not(:has(.modal-error)) .charging-input:not(:placeholder-shown) {
+  background-image: url("/valid.svg");
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: calc(100% - 5px) center;
+  border: 1px solid green;
+}
+
+.m_input:not(:has(.modal-error)) .charging-input:not(:placeholder-shown):focus {
+  box-shadow: 0 0 0 2px #22c55e;
+  outline: none;
+}

@@ -1,7 +1,5 @@
 import { Form, Formik, ErrorMessage, Field } from "formik";
 import * as yup from "yup";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -9,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../Slices/userSlice";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import "../static/login.css";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,10 +42,7 @@ export default function Login() {
 
   const onSubmit = async (values) => {
     try {
-      const response = await axios.post(
-        "https://api.mnil.hashtechy.space/admin/login",
-        values
-      );
+      const response = await axios.post("login", values);
       console.log(response.data);
 
       const data = response.data;
@@ -94,11 +90,14 @@ export default function Login() {
                     <Field
                       type="email"
                       name="email"
-                      className="form-control"
+                      className="form-control input-login"
                       id="floatingEmail"
                       placeholder="Email"
                     />
-                    <label htmlFor="floatingEmail">
+                    <label
+                      htmlFor="floatingEmail"
+                      style={{ top: "1.5px", left: "6px", fontSize: "16px" }}
+                    >
                       Email address<span> *</span>
                     </label>
                     <ErrorMessage
@@ -115,17 +114,20 @@ export default function Login() {
                     <Field
                       type={showPassword ? "text" : "password"}
                       name="password"
-                      className="form-control"
+                      className="form-control input-login"
                       id="floatingPassword"
                       placeholder="Password"
                     />
 
-                    <label htmlFor="floatingPassword">
+                    <label
+                      htmlFor="floatingPassword"
+                      style={{ top: "1.5px", left: "6px", fontSize: "16px" }}
+                    >
                       Password<span> *</span>
                     </label>
-                    <FontAwesomeIcon
+                    <img
+                      src="/eye.svg"
                       className="set-icon"
-                      icon={showPassword ? faEyeSlash : faEye}
                       onClick={() => setShowPassword(!showPassword)}
                     />
 

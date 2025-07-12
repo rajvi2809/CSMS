@@ -1,16 +1,14 @@
+import axios from "axios";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
 import Select from "react-select";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import axios from "axios";
 import Modal from "react-bootstrap/Modal";
-
 import { useEffect, useState } from "react";
-import { useCookies } from "react-cookie";
 import moment from "moment-timezone";
 import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import "../static/booking.css";
 
 const Options = [
   { value: "Technical Issues", label: "Technical Issues" },
@@ -28,7 +26,8 @@ const OptionsFilter = [
 ];
 
 export default function Booking() {
-  const [cookies] = useCookies(["accessToken"]);
+  //const [cookies] = useCookies(["accessToken"]);
+  const [statusFilter, setStatusFilter] = useState(null);
   const [allData, setallData] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [show, setShow] = useState(false);
@@ -45,51 +44,56 @@ export default function Booking() {
   const handleSelectClose = () => setSelectBtn(false);
   const handleFilterOpt = () => setTopFilter(!topFilter);
 
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+  });
+
+  const fetchdata = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`booking?limit=10&page=${page}`);
+      console.log(response?.data);
+
+      const newData = response?.data?.data || [];
+
+      setallData((prevData) => [...prevData, ...newData]);
+
+      setPagination({
+        current_page: response?.data?.pagination?.current_page || page,
+        total_pages: response?.data?.pagination?.total_pages || 1,
+      });
+    } catch (error) {
+      console.log("Error", error);
+    }
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchdata = async () => {
-      setLoading(true);
-      try {
-        // console.log("in try");
-        const token = cookies.accessToken;
-        if (!token) {
-          console.log("No Token");
-        }
-        const response = await axios.get(
-          `https://api.mnil.hashtechy.space/admin/booking?limit=10&page=${page}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "User-Type": "Admin",
-            },
-          }
-        );
-        console.log(response?.data?.data);
-
-        const newData = response?.data?.data || [];
-
-        setallData((prevData) => [...prevData, ...newData]);
-      } catch (error) {
-        console.log("Error", error);
-      }
-      setLoading(false);
-    };
-    fetchdata();
+    if (page <= pagination.total_pages) {
+      fetchdata();
+    }
   }, [page]);
 
   const handleScrollEvent = async () => {
     // console.log("Height=", document.documentElement.scrollHeight); //84227
     // console.log("View port=", window.innerHeight); //288
     // console.log("scroll=", document.documentElement.scrollTop);
-
     try {
+      //console.log("in try");
+      // console.log(pagination?.current_page);
       if (
         window.innerHeight + document.documentElement.scrollTop + 1 >=
         document.documentElement.scrollHeight
       ) {
-        setPage((prev) => prev + 1);
+        //  console.log("in try if");
+        if (!loading && pagination?.current_page <= pagination?.total_pages) {
+          //console.log("object");
+          //console.log(pagination?.current_page);
+          setPage((prevPage) => prevPage + 1);
+        }
       }
     } catch (error) {
-      console.log(error);
+      console.log("Scroll error", error);
     }
   };
 
@@ -97,6 +101,10 @@ export default function Booking() {
     window.addEventListener("scroll", handleScrollEvent);
     return () => window.removeEventListener("scroll", handleScrollEvent);
   }, []);
+
+  const filteredBookings = statusFilter
+    ? allData.filter((booking) => booking.status === statusFilter.value)
+    : allData;
 
   return (
     <>
@@ -127,6 +135,8 @@ export default function Booking() {
                 display: "flex",
                 gap: "20px",
                 marginBottom: "15px",
+                width: "1026px",
+                backgroundColor: "white",
               }}
             >
               <div className="input-group">
@@ -139,8 +149,9 @@ export default function Booking() {
               </div>
               <Select
                 className="custom-select"
-                placeholder="Select Reason"
-                onChange={setSelectedOption}
+                placeholder="Select Booking status"
+                isClearable={true}
+                onChange={setStatusFilter}
                 options={OptionsFilter}
                 styles={{
                   control: (baseStyles, state) => ({
@@ -156,9 +167,20 @@ export default function Booking() {
                   }),
                   option: (base, state) => ({
                     ...base,
-                    backgroundColor: state.isFocused
-                      ? "rgb(32,178,170)"
-                      : "white",
+                    backgroundColor:
+                      state.isFocused || state.isSelected
+                        ? "rgb(32,178,170)"
+                        : "white",
+                    color:
+                      state.isFocused || state.isSelected ? "white" : "black",
+                    "&:active": {
+                      backgroundColor: "rgb(32,178,170)",
+                      color: "white",
+                    },
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: "black", // Ensures selected value text stays black
                   }),
                 }}
               ></Select>
@@ -184,7 +206,7 @@ export default function Booking() {
                 </tr>
               </thead>
               <tbody>
-                {allData.map((data) => (
+                {filteredBookings?.map((data) => (
                   <tr key={data?.id}>
                     <td
                       className="popup-details"
@@ -553,7 +575,14 @@ export default function Booking() {
                             </div>
                           </Modal.Body>
                           <Modal.Footer>
-                            <Button variant="secondary" onClick={handleClose}>
+                            <Button
+                              style={{
+                                backgroundColor: "#d3d4d5",
+                                border: "none",
+                                color: "black",
+                              }}
+                              onClick={handleClose}
+                            >
                               Close
                             </Button>
                           </Modal.Footer>
@@ -593,7 +622,6 @@ export default function Booking() {
                             fontSize: "12px",
                             position: "absolute",
                             display: "inline-flex",
-                            alignItems: "center",
                           }}
                         >
                           {data?.charger_position.charAt(0).toUpperCase()}
@@ -619,6 +647,8 @@ export default function Booking() {
                             ? "alert alert-danger border border-danger"
                             : data?.status === "Confirmed"
                             ? "alert alert-info border border-info"
+                            : data?.status === "Ongoing"
+                            ? "alert border border-dark"
                             : ""
                         }
                       >
@@ -748,10 +778,25 @@ export default function Booking() {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleSelectClose}>
+            <Button
+              style={{
+                backgroundColor: "#d3d4d5",
+                border: "none",
+                color: "black",
+              }}
+              onClick={handleSelectClose}
+            >
               Close
             </Button>
-            <Button variant="primary">Submit</Button>
+            <Button
+              style={{
+                backgroundColor: "rgb(32,178,170)",
+                color: "white",
+                border: "none",
+              }}
+            >
+              Submit
+            </Button>
           </Modal.Footer>
         </Modal>
       )}

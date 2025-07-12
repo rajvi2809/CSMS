@@ -1,0 +1,28 @@
+.main-table-manage th,
+.main-table-manage td {
+  text-align: left;
+}
+
+.main-table-manage tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.popup-modal-img-archive {
+  height: 35px;
+  width: 35px;
+  mask-image: url(/archive.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: #ffc107;
+  margin-bottom: 10px;
+}
+.popup-modal-img-restore {
+  height: 35px;
+  width: 35px;
+  mask-image: url(/restore.svg);
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background-color: black;
+  margin-bottom: 10px;
+}

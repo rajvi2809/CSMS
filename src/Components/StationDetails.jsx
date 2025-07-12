@@ -2,13 +2,12 @@ import moment from "moment-timezone";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import "../static/stationDetails.css";
 
 export default function StationDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [cookies] = useCookies(["accessToken"]);
   const [allData, setallData] = useState([]);
 
   const handleNavigate = () => {
@@ -17,23 +16,11 @@ export default function StationDetails() {
 
   const fetchdata = async () => {
     try {
-      const token = cookies.accessToken;
-      if (!token) {
-        console.log("No Token");
-      }
-
-      const response = await axios.get(
-        `https://api.mnil.hashtechy.space/admin/charging-station`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Type": "Admin",
-          },
-          params: {
-            station_id: id,
-          },
-        }
-      );
+      const response = await axios.get(`charging-station`, {
+        params: {
+          station_id: id,
+        },
+      });
       console.log(response?.data);
       const newData = response?.data?.data || [];
       setallData(newData);
@@ -167,8 +154,81 @@ export default function StationDetails() {
               </table>
             </div>
           </div>
+          <div>
+            {allData[0]?.chargers.length > 0 && (
+              <div style={{ marginTop: "15px" }}>
+                <h6 style={{ fontWeight: "600", color: "#242424bf" }}>
+                  Chargers
+                </h6>
+                <div style={{ display: "flex", gap: "15px" }}>
+                  {allData[0]?.chargers.map((data) => (
+                    <div className="charger-card">
+                      <div className="box-div">
+                        <div>
+                          <h6 style={{ fontSize: "1.125rem" }}>{data?.id}</h6>
+                          <div style={{ display: "flex" }}>
+                            {data?.connectors?.map((type) => (
+                              <p
+                                className={
+                                  type?.status === "Available"
+                                    ? "custom-alert alert alert-success border border-success"
+                                    : "custom-alert alert alert-danger border border-danger"
+                                }
+                                style={{
+                                  padding: "4px",
+                                }}
+                              >
+                                {type?.connector_type}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ minWidth: "113px" }}>
+                          {data?.connectors?.map((chargerImg) => (
+                            <img
+                              src={`https://api.mnil.hashtechy.space${chargerImg?.connector_img}`}
+                              className="connector-img"
+                            />
+                          ))}
+                        </div>
+                      </div>
 
-          {allData[0]?.chargers.length > 0 && <div>Chargers</div>}
+                      <hr className="hr-style-station" />
+
+                      <div style={{ display: "flex", paddingTop: "3px" }}>
+                        <div className="box-bottom-div">
+                          <h4 className="heading-tag">Voltage</h4>{" "}
+                          <p>
+                            <p>{data?.output_voltage}V</p>
+                          </p>
+                        </div>
+                        <div className="vr"></div>
+
+                        <div className="box-bottom-div">
+                          <h4 className="heading-tag">Current</h4>
+
+                          <p>{data?.output_current}A</p>
+                        </div>
+                        <div className="vr"></div>
+
+                        <div className="box-bottom-div">
+                          <h4 className="heading-tag">Firmware Version</h4>
+                          <p
+                            style={{
+                              color: "rgb(108, 117, 125)",
+                              minWidth: "104px",
+                            }}
+                          >
+                            {data?.firmware_version}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>

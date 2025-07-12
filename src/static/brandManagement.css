@@ -1,0 +1,65 @@
+.main-table-brands {
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.main-table-brands tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.brand-img-div {
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  object-fit: contain;
+  height: 70px;
+  width: 70px;
+}
+
+.delete-btn {
+  all: unset;
+  background-color: #ff00001a;
+  padding: 4px 8px 4px 8px;
+  margin-right: 5px;
+  border-radius: 20%;
+}
+
+.delete-btn:hover {
+  background-color: #f006;
+}
+.brand-modal-title-img {
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  background-color: red;
+  mask-image: url("/delete.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: cover;
+}
+
+.m_input.is-valid .input-brand {
+  background-image: url("/valid.svg");
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: calc(100% - 5px) center;
+}
+
+.m_input.is-valid .input-brand:focus {
+  box-shadow: 0 0 0 2px #22c55e;
+  outline: none;
+}
+
+/* ✅ Red tick/error for fields with errors */
+.m_input:has(.error-div) .input-brand {
+  background-image: url("/error.svg");
+  border: 1px solid red;
+  border-radius: 4px;
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: calc(100% - 5px) center;
+}
+
+.m_input:has(.error-div) .input-brand:focus {
+  box-shadow: 0 0 0 2px #ef4444;
+  outline: none;
+}
