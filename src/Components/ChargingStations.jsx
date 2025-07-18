@@ -1,3 +1,4 @@
+import { useDebounce } from "use-debounce";
 import { Form, Field, Formik, ErrorMessage } from "formik";
 import * as yup from "yup";
 import Select from "react-select";
@@ -15,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import "../static/chargingStation.css";
 
 export default function ChargingStations() {
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
   const [topFilter, setTopFilter] = useState(false);
   const [allData, setallData] = useState([]);
   const [page, setPage] = useState(1);
@@ -118,7 +121,15 @@ export default function ChargingStations() {
         toast.success("Station created successfully");
 
         // Add to local state
-        setallData((prevData) => [response.data.data, ...prevData]);
+
+        if (page === 1) {
+          setallData(response?.data?.data || []);
+        } else {
+          setallData((prevData) => [
+            ...prevData,
+            ...(response?.data?.data || []),
+          ]);
+        }
       }
 
       handleCloseStation();
@@ -260,6 +271,7 @@ export default function ChargingStations() {
           page: page,
           ...(filters.active ? { active: true } : {}),
           ...(filters.archived ? { archived: true } : {}),
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
         },
       });
 
@@ -274,6 +286,8 @@ export default function ChargingStations() {
           current_page: response?.data?.pagination?.current_page || page,
           total_pages: response?.data?.pagination?.total_pages || 1,
         });
+      } else if (response?.data?.code === 204) {
+        setallData([]);
       }
     } catch (error) {
       console.log("Error", error);
@@ -385,7 +399,7 @@ export default function ChargingStations() {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page, filters]);
+  }, [page, filters, debouncedSearchText]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -613,6 +627,11 @@ export default function ChargingStations() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -633,7 +652,7 @@ export default function ChargingStations() {
                 </tr>
               </thead>
               <tbody>
-                {allData.length === 0 ? (
+                {allData.length === 0 && !loading ? (
                   <tr>
                     <td colSpan={6} style={{ padding: "100px 0" }}>
                       <div
@@ -848,7 +867,7 @@ export default function ChargingStations() {
                     id="stationName"
                   />
                   <label htmlFor="stationName">
-                    Station Name<span>*</span>
+                    Station Name<span className="span1">*</span>
                   </label>
                   <ErrorMessage
                     name="stationName"
@@ -869,7 +888,7 @@ export default function ChargingStations() {
                     id="address"
                   />
                   <label htmlFor="address">
-                    Address<span>*</span>
+                    Address<span className="span1">*</span>
                   </label>
                   <ErrorMessage
                     name="address"
@@ -884,7 +903,7 @@ export default function ChargingStations() {
                 >
                   <div className="charging-input-select m_input">
                     <h6 style={{ marginBottom: "5px" }}>
-                      Charger<span>*</span>
+                      Charger<span className="span1">*</span>
                     </h6>
                     <Select
                       isMulti
@@ -928,7 +947,7 @@ export default function ChargingStations() {
 
                   <div className="charging-input-select m_input">
                     <h6 style={{ marginBottom: "5px" }}>
-                      Amenities<span>*</span>
+                      Amenities<span className="span1">*</span>
                     </h6>
                     <Select
                       isMulti
@@ -985,7 +1004,7 @@ export default function ChargingStations() {
                       id="latitude"
                     />
                     <label htmlFor="latitude">
-                      Latitude<span>*</span>
+                      Latitude<span className="span1">*</span>
                     </label>
                     <ErrorMessage
                       name="latitude"
@@ -1003,7 +1022,7 @@ export default function ChargingStations() {
                       id="longitude"
                     />
                     <label htmlFor="longitude">
-                      Longitude<span>*</span>
+                      Longitude<span className="span1">*</span>
                     </label>
                     <ErrorMessage
                       name="longitude"

@@ -26,3 +26,16 @@
   background-color: black;
   margin-bottom: 10px;
 }
+
+.pass-btn {
+  all: unset;
+  height: 40px;
+  width: 40px;
+  border: 1px solid #20b2aa;
+  border-radius: 7px;
+  text-align: center;
+}
+
+.pass-btn:hover {
+  background-color: #20b2aa;
+}

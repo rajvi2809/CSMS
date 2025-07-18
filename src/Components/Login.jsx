@@ -98,7 +98,7 @@ export default function Login() {
                       htmlFor="floatingEmail"
                       style={{ top: "1.5px", left: "6px", fontSize: "16px" }}
                     >
-                      Email address<span> *</span>
+                      Email address<span className="span1"> *</span>
                     </label>
                     <ErrorMessage
                       name="email"
@@ -123,7 +123,7 @@ export default function Login() {
                       htmlFor="floatingPassword"
                       style={{ top: "1.5px", left: "6px", fontSize: "16px" }}
                     >
-                      Password<span> *</span>
+                      Password<span className="span1"> *</span>
                     </label>
                     <img
                       src="/eye.svg"

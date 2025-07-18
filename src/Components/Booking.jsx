@@ -1,3 +1,4 @@
+import { useDebounce } from "use-debounce";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import Collapse from "react-bootstrap/Collapse";
@@ -27,8 +28,9 @@ const OptionsFilter = [
 
 export default function Booking() {
   //const [cookies] = useCookies(["accessToken"]);
-  const [statusFilter, setStatusFilter] = useState(null);
   const [allData, setallData] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
   const [selectedId, setSelectedId] = useState(null);
   const [show, setShow] = useState(false);
   const [page, setPage] = useState(1);
@@ -37,6 +39,7 @@ export default function Booking() {
 
   const [selectBtn, setSelectBtn] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -52,12 +55,24 @@ export default function Booking() {
   const fetchdata = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`booking?limit=10&page=${page}`);
+      const response = await axios.get(`booking?limit=10&page=${page}`, {
+        params: {
+          ...(statusFilter && { status: statusFilter }),
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
+        },
+      });
       console.log(response?.data);
 
-      const newData = response?.data?.data || [];
-
-      setallData((prevData) => [...prevData, ...newData]);
+      if (page === 1) {
+        setallData(response?.data?.data || []);
+      } else if (response?.data?.code === 204) {
+        setallData([]);
+      } else {
+        setallData((prevData) => [
+          ...prevData,
+          ...(response?.data?.data || []),
+        ]);
+      }
 
       setPagination({
         current_page: response?.data?.pagination?.current_page || page,
@@ -68,11 +83,12 @@ export default function Booking() {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page]);
+  }, [page, statusFilter, debouncedSearchText]);
 
   const handleScrollEvent = async () => {
     // console.log("Height=", document.documentElement.scrollHeight); //84227
@@ -101,10 +117,6 @@ export default function Booking() {
     window.addEventListener("scroll", handleScrollEvent);
     return () => window.removeEventListener("scroll", handleScrollEvent);
   }, []);
-
-  const filteredBookings = statusFilter
-    ? allData.filter((booking) => booking.status === statusFilter.value)
-    : allData;
 
   return (
     <>
@@ -145,13 +157,22 @@ export default function Booking() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
               </div>
+
               <Select
+                onChange={(selectedOption) => {
+                  setPage(1);
+                  setStatusFilter(selectedOption ? selectedOption.value : null);
+                }}
                 className="custom-select"
                 placeholder="Select Booking status"
                 isClearable={true}
-                onChange={setStatusFilter}
                 options={OptionsFilter}
                 styles={{
                   control: (baseStyles, state) => ({
@@ -206,493 +227,7 @@ export default function Booking() {
                 </tr>
               </thead>
               <tbody>
-                {filteredBookings?.map((data) => (
-                  <tr key={data?.id}>
-                    <td
-                      className="popup-details"
-                      variant="primary"
-                      onClick={() => {
-                        setSelectedId(data.id);
-                        handleShow();
-                      }}
-                    >
-                      {data?.id}
-                    </td>
-
-                    {selectedId === data.id && (
-                      <>
-                        <Modal
-                          show={show}
-                          onHide={handleClose}
-                          size="xl"
-                          backdrop="static"
-                          keyboard={true}
-                          style={{
-                            backdropFilter: "blur(2px)",
-                            fontSize: "16px",
-                          }}
-                        >
-                          <Modal.Header
-                            closeButton
-                            className="custom-modelHeader"
-                          >
-                            <Modal.Title>{data?.id}</Modal.Title>
-                          </Modal.Header>
-                          <Modal.Body>
-                            <div className="popup-body">
-                              <div className="popup-user">
-                                <div className="popup-user1">
-                                  {data?.user?.profile_img ? (
-                                    <img
-                                      src={`https://api.mnil.hashtechy.space/${data?.user?.profile_img}`}
-                                      alt=""
-                                      style={{
-                                        objectFit: "contain",
-                                        border: "1px solid #dee2e6",
-                                        borderRadius: "50%",
-                                        height: "3.75rem",
-                                        width: "3.75rem",
-                                      }}
-                                    />
-                                  ) : (
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        backgroundColor: "#dee2e6",
-                                        borderRadius: "50%",
-                                        height: "3.75rem",
-                                        width: "3.75rem",
-                                        fontSize: "1.5rem",
-                                        fontWeight: "bold",
-                                        color: "#495057",
-                                        border: "1px solid #dee2e6",
-                                      }}
-                                    >
-                                      {data?.user?.name
-                                        ?.charAt(0)
-                                        .toUpperCase()}
-                                    </div>
-                                  )}
-                                  <div>
-                                    <h6
-                                      style={{
-                                        color: "#242424",
-                                        fontSize: "1.25rem",
-                                        fontWeight: "bolder",
-                                      }}
-                                    >
-                                      {data?.user?.name}
-                                    </h6>
-                                    <p
-                                      style={{
-                                        marginBottom: "0px",
-                                        fontSize: "0.75rem",
-                                      }}
-                                    >
-                                      <img
-                                        src="./phone.svg"
-                                        alt=""
-                                        style={{
-                                          width: "14px",
-                                          height: "14px",
-                                        }}
-                                      />
-                                      {"  "}
-                                      {data?.user?.phone}
-                                    </p>
-                                    <p style={{ fontSize: "0.75rem" }}>
-                                      <img
-                                        src="./msg.svg"
-                                        alt=""
-                                        style={{
-                                          width: "14px",
-                                          height: "14px",
-                                        }}
-                                      />
-                                      {"  "}
-                                      {data?.user?.email}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="popup-user2">
-                                  <p
-                                    style={{
-                                      color: "#7d7d7d",
-                                      fontSize: ".875rem",
-                                    }}
-                                  >
-                                    Vehicle Name
-                                  </p>
-                                  <p
-                                    style={{
-                                      color: "#000",
-                                      fontWeight: "bolder",
-                                    }}
-                                  >
-                                    {
-                                      data?.vehicles_catalogue?.brand
-                                        ?.brand_name
-                                    }{" "}
-                                    {data?.vehicles_catalogue?.model}
-                                  </p>
-                                </div>
-
-                                <div className="popup-user3">
-                                  <p
-                                    style={{
-                                      color: "#7d7d7d",
-                                      fontSize: ".875rem",
-                                    }}
-                                  >
-                                    Consumption (W)
-                                  </p>
-                                  <p
-                                    style={{
-                                      color: "#000",
-                                      fontWeight: "bolder",
-                                    }}
-                                  >
-                                    {data?.consumption ?? 0}
-                                  </p>
-                                </div>
-
-                                <div className="popup-user4">
-                                  <p
-                                    style={{
-                                      color: "#7d7d7d",
-                                      fontSize: ".875rem",
-                                    }}
-                                  >
-                                    Payment Method
-                                  </p>
-                                  <p
-                                    style={{
-                                      color: "#000",
-                                      fontWeight: "bolder",
-                                    }}
-                                  >
-                                    {data?.bookingwise_payment
-                                      ?.payment_method ?? "-"}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="popup-vehicle">
-                                <table className="vehicle-table">
-                                  <thead>
-                                    <tr>
-                                      <th>Serial Number</th>
-                                      <th>Station Name</th>
-                                      <th>Connector / Position</th>
-                                      <th>Slot Time</th>
-                                      <th>Booking Time</th>
-                                      {data?.status === "Completed" && (
-                                        <th>Session</th>
-                                      )}
-                                      {data?.status === "Cancelled" && (
-                                        <th>Cancelled Time</th>
-                                      )}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td>{data?.charger?.id}</td>
-
-                                      <td>{data?.station?.station_name}</td>
-
-                                      <td>
-                                        {data?.connector?.connector_type}
-                                        {<br />}
-                                        <span style={{ color: "#696969" }}>
-                                          {data?.charger_position}
-                                        </span>
-                                      </td>
-
-                                      <td>
-                                        {moment
-                                          .tz(
-                                            data?.booked_start_time,
-                                            "Asia/Kolkata"
-                                          )
-                                          .format("hh:mm A")}
-                                        -
-                                        {moment
-                                          .tz(
-                                            data?.booked_end_time,
-                                            "Asia/Kolkata"
-                                          )
-                                          .format("hh:mm A")}
-                                      </td>
-
-                                      <td>
-                                        {moment
-                                          .tz(
-                                            data?.booked_start_time,
-                                            "Asia/Kolkata"
-                                          )
-                                          .format("YYYY-MM-DD")}
-                                        <br />
-                                        <span
-                                          style={{
-                                            color: "black",
-                                            fontWeight: "bold",
-                                          }}
-                                        >
-                                          {" "}
-                                          {moment
-                                            .tz(
-                                              data?.booked_start_time,
-                                              "Asia/Kolkata"
-                                            )
-                                            .format("hh:mm A")}
-                                        </span>
-                                      </td>
-                                      {data?.status === "Completed" && (
-                                        <td
-                                          style={{
-                                            padding: " 5px 16px 5px 5px",
-                                          }}
-                                        >
-                                          {moment
-                                            .tz(
-                                              data?.session_start_time,
-                                              "Asia/Kolkata"
-                                            )
-                                            .format("hh:mm A")}
-                                          {" - "}
-                                          {moment
-                                            .tz(
-                                              data?.session_end_time,
-                                              "Asia/Kolkata"
-                                            )
-                                            .format("hh:mm A")}
-                                        </td>
-                                      )}
-                                      {data?.status === "Cancelled" && (
-                                        <td
-                                          style={{
-                                            padding: " 5px 16px 5px 5px",
-                                          }}
-                                        >
-                                          {moment
-                                            .tz(data?.updatedAt, "Asia/Kolkata")
-                                            .format("YYYY-MM-DD")}
-                                          {"  "}
-                                          {moment
-                                            .tz(data?.updatedAt, "Asia/Kolkata")
-                                            .format("hh:mm A")}{" "}
-                                        </td>
-                                      )}
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-
-                              <div className="popup-price">
-                                <table className="popup-price-table">
-                                  <thead>
-                                    <tr>
-                                      <th>Price Details</th>
-                                      <th
-                                        style={{
-                                          textAlign: "end",
-                                          paddingRight: "20px",
-                                        }}
-                                      >
-                                        Price
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td>Base Price</td>
-                                      <td
-                                        style={{
-                                          textAlign: "end",
-                                          paddingRight: "20px",
-                                        }}
-                                      >
-                                        ₹
-                                        {data?.bookingwise_payment?.base_fee ??
-                                          0}
-                                      </td>
-                                    </tr>
-
-                                    <tr>
-                                      <td>Parking Fees</td>
-                                      <td
-                                        style={{
-                                          textAlign: "end",
-                                          paddingRight: "20px",
-                                        }}
-                                      >
-                                        ₹
-                                        {data?.bookingwise_payment
-                                          ?.parking_fee ?? 0}
-                                      </td>
-                                    </tr>
-
-                                    <tr>
-                                      <td>Convenience fee</td>
-                                      <td
-                                        style={{
-                                          textAlign: "end",
-                                          paddingRight: "20px",
-                                        }}
-                                      >
-                                        ₹
-                                        {data?.bookingwise_payment
-                                          ?.convenience_fee ?? 0}
-                                      </td>
-                                    </tr>
-
-                                    <tr>
-                                      <td>Total Amount</td>
-                                      <td
-                                        style={{
-                                          textAlign: "end",
-                                          paddingRight: "20px",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            color: "black",
-                                          }}
-                                        >
-                                          ₹
-                                          {data?.bookingwise_payment?.amount ??
-                                            0}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          </Modal.Body>
-                          <Modal.Footer>
-                            <Button
-                              style={{
-                                backgroundColor: "#d3d4d5",
-                                border: "none",
-                                color: "black",
-                              }}
-                              onClick={handleClose}
-                            >
-                              Close
-                            </Button>
-                          </Modal.Footer>
-                        </Modal>
-                      </>
-                    )}
-
-                    <td>{data?.charger?.id}</td>
-
-                    <td style={{ textAlign: "left" }}>
-                      {data?.user?.name}
-                      <br />
-                      <span style={{ color: " rgb(73, 80, 87)" }}>
-                        {data?.user?.phone}
-                      </span>
-                    </td>
-
-                    <td>{data?.station?.station_name}</td>
-
-                    <td>
-                      <div style={{ position: "relative" }}>
-                        <img
-                          className="img-connector"
-                          src={`https://api.mnil.hashtechy.space/${data?.connector?.connector_img}`}
-                        />
-
-                        <span
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            backgroundColor: "#f1f1f1",
-                            color: "#000",
-                            borderRadius: "50%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 500,
-                            fontSize: "12px",
-                            position: "absolute",
-                            display: "inline-flex",
-                          }}
-                        >
-                          {data?.charger_position.charAt(0).toUpperCase()}
-                        </span>
-                        <br />
-                        {data?.connector?.connector_type}
-                      </div>
-                    </td>
-
-                    <td>
-                      <p
-                        style={{
-                          height: "auto",
-                          paddingTop: "5px",
-                          paddingBottom: "5px",
-                        }}
-                        className={
-                          data?.status === "Completed"
-                            ? "alert alert-success border border-success"
-                            : data?.status === "Pending"
-                            ? "alert alert-warning border border-warning"
-                            : data?.status === "Cancelled"
-                            ? "alert alert-danger border border-danger"
-                            : data?.status === "Confirmed"
-                            ? "alert alert-info border border-info"
-                            : data?.status === "Ongoing"
-                            ? "alert border border-dark"
-                            : ""
-                        }
-                      >
-                        {data?.status}
-                      </p>
-                    </td>
-
-                    <td>
-                      {moment
-                        .tz(data?.booked_start_time, "Asia/Kolkata")
-                        .format("YYYY-MM-DD")}
-                      <br />
-                      <span style={{ color: "black", fontWeight: "bold" }}>
-                        {" "}
-                        {moment
-                          .tz(data?.booked_start_time, "Asia/Kolkata")
-                          .format("hh:mm A")}
-                      </span>
-                    </td>
-                    <td>₹{data?.bookingwise_payment?.amount ?? 0}/-</td>
-
-                    <td>{data?.bookingwise_payment?.payment_method ?? "-"}</td>
-                    <td>
-                      {data?.status === "Confirmed" ? (
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={
-                            <Tooltip id="tooltip-cancel">Cancel</Tooltip>
-                          }
-                        >
-                          <button
-                            className="cancel-btn"
-                            onClick={handleSelectOpen}
-                          >
-                            <img src="./cross.svg" alt="" />
-                          </button>
-                        </OverlayTrigger>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {loading && (
+                {loading ? (
                   <tr>
                     <td>
                       <Skeleton width={50} />
@@ -725,6 +260,531 @@ export default function Booking() {
                       <Skeleton width={60} />
                     </td>
                   </tr>
+                ) : allData?.length === 0 && !loading ? (
+                  <tr>
+                    <td
+                      colSpan="10"
+                      style={{ textAlign: "center", padding: "40px 0" }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <img
+                          src="/noRecords.png"
+                          alt="No records found"
+                          style={{ width: "258px", margin: "auto" }}
+                        />
+                        <p
+                          style={{
+                            fontSize: "20px",
+                            marginTop: "5px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          No records found
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  allData?.map((data) => (
+                    <tr key={data?.id}>
+                      <td
+                        className="popup-details"
+                        variant="primary"
+                        onClick={() => {
+                          setSelectedId(data.id);
+                          handleShow();
+                        }}
+                      >
+                        {data?.id}
+                      </td>
+
+                      {selectedId === data.id && (
+                        <>
+                          <Modal
+                            show={show}
+                            onHide={handleClose}
+                            size="xl"
+                            backdrop="static"
+                            keyboard={true}
+                            style={{
+                              backdropFilter: "blur(2px)",
+                              fontSize: "16px",
+                            }}
+                          >
+                            <Modal.Header
+                              closeButton
+                              className="custom-modelHeader"
+                            >
+                              <Modal.Title>{data?.id}</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              <div className="popup-body">
+                                <div className="popup-user">
+                                  <div className="popup-user1">
+                                    {data?.user?.profile_img ? (
+                                      <img
+                                        src={`https://api.mnil.hashtechy.space/${data?.user?.profile_img}`}
+                                        alt=""
+                                        style={{
+                                          objectFit: "contain",
+                                          border: "1px solid #dee2e6",
+                                          borderRadius: "50%",
+                                          height: "3.75rem",
+                                          width: "3.75rem",
+                                        }}
+                                      />
+                                    ) : (
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          backgroundColor: "#dee2e6",
+                                          borderRadius: "50%",
+                                          height: "3.75rem",
+                                          width: "3.75rem",
+                                          fontSize: "1.5rem",
+                                          fontWeight: "bold",
+                                          color: "#495057",
+                                          border: "1px solid #dee2e6",
+                                        }}
+                                      >
+                                        {data?.user?.name
+                                          ?.charAt(0)
+                                          .toUpperCase()}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <h6
+                                        style={{
+                                          color: "#242424",
+                                          fontSize: "1.25rem",
+                                          fontWeight: "bolder",
+                                        }}
+                                      >
+                                        {data?.user?.name}
+                                      </h6>
+                                      <p
+                                        style={{
+                                          marginBottom: "0px",
+                                          fontSize: "0.75rem",
+                                        }}
+                                      >
+                                        <img
+                                          src="./phone.svg"
+                                          alt=""
+                                          style={{
+                                            width: "14px",
+                                            height: "14px",
+                                          }}
+                                        />
+                                        {"  "}
+                                        {data?.user?.phone}
+                                      </p>
+                                      <p style={{ fontSize: "0.75rem" }}>
+                                        <img
+                                          src="./msg.svg"
+                                          alt=""
+                                          style={{
+                                            width: "14px",
+                                            height: "14px",
+                                          }}
+                                        />
+                                        {"  "}
+                                        {data?.user?.email}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="popup-user2">
+                                    <p
+                                      style={{
+                                        color: "#7d7d7d",
+                                        fontSize: ".875rem",
+                                      }}
+                                    >
+                                      Vehicle Name
+                                    </p>
+                                    <p
+                                      style={{
+                                        color: "#000",
+                                        fontWeight: "bolder",
+                                      }}
+                                    >
+                                      {
+                                        data?.vehicles_catalogue?.brand
+                                          ?.brand_name
+                                      }{" "}
+                                      {data?.vehicles_catalogue?.model}
+                                    </p>
+                                  </div>
+
+                                  <div className="popup-user3">
+                                    <p
+                                      style={{
+                                        color: "#7d7d7d",
+                                        fontSize: ".875rem",
+                                      }}
+                                    >
+                                      Consumption (W)
+                                    </p>
+                                    <p
+                                      style={{
+                                        color: "#000",
+                                        fontWeight: "bolder",
+                                      }}
+                                    >
+                                      {data?.consumption ?? 0}
+                                    </p>
+                                  </div>
+
+                                  <div className="popup-user4">
+                                    <p
+                                      style={{
+                                        color: "#7d7d7d",
+                                        fontSize: ".875rem",
+                                      }}
+                                    >
+                                      Payment Method
+                                    </p>
+                                    <p
+                                      style={{
+                                        color: "#000",
+                                        fontWeight: "bolder",
+                                      }}
+                                    >
+                                      {data?.bookingwise_payment
+                                        ?.payment_method ?? "-"}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="popup-vehicle">
+                                  <table className="vehicle-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Serial Number</th>
+                                        <th>Station Name</th>
+                                        <th>Connector / Position</th>
+                                        <th>Slot Time</th>
+                                        <th>Booking Time</th>
+                                        {data?.status === "Completed" && (
+                                          <th>Session</th>
+                                        )}
+                                        {data?.status === "Cancelled" && (
+                                          <th>Cancelled Time</th>
+                                        )}
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td>{data?.charger?.id}</td>
+
+                                        <td>{data?.station?.station_name}</td>
+
+                                        <td>
+                                          {data?.connector?.connector_type}
+                                          {<br />}
+                                          <span style={{ color: "#696969" }}>
+                                            {data?.charger_position}
+                                          </span>
+                                        </td>
+
+                                        <td>
+                                          {moment
+                                            .tz(
+                                              data?.booked_start_time,
+                                              "Asia/Kolkata"
+                                            )
+                                            .format("hh:mm A")}
+                                          -
+                                          {moment
+                                            .tz(
+                                              data?.booked_end_time,
+                                              "Asia/Kolkata"
+                                            )
+                                            .format("hh:mm A")}
+                                        </td>
+
+                                        <td>
+                                          {moment
+                                            .tz(
+                                              data?.booked_start_time,
+                                              "Asia/Kolkata"
+                                            )
+                                            .format("YYYY-MM-DD")}
+                                          <br />
+                                          <span
+                                            style={{
+                                              color: "black",
+                                              fontWeight: "bold",
+                                            }}
+                                          >
+                                            {" "}
+                                            {moment
+                                              .tz(
+                                                data?.booked_start_time,
+                                                "Asia/Kolkata"
+                                              )
+                                              .format("hh:mm A")}
+                                          </span>
+                                        </td>
+                                        {data?.status === "Completed" && (
+                                          <td
+                                            style={{
+                                              padding: " 5px 16px 5px 5px",
+                                            }}
+                                          >
+                                            {moment
+                                              .tz(
+                                                data?.session_start_time,
+                                                "Asia/Kolkata"
+                                              )
+                                              .format("hh:mm A")}
+                                            {" - "}
+                                            {moment
+                                              .tz(
+                                                data?.session_end_time,
+                                                "Asia/Kolkata"
+                                              )
+                                              .format("hh:mm A")}
+                                          </td>
+                                        )}
+                                        {data?.status === "Cancelled" && (
+                                          <td
+                                            style={{
+                                              padding: " 5px 16px 5px 5px",
+                                            }}
+                                          >
+                                            {moment
+                                              .tz(
+                                                data?.updatedAt,
+                                                "Asia/Kolkata"
+                                              )
+                                              .format("YYYY-MM-DD")}
+                                            {"  "}
+                                            {moment
+                                              .tz(
+                                                data?.updatedAt,
+                                                "Asia/Kolkata"
+                                              )
+                                              .format("hh:mm A")}{" "}
+                                          </td>
+                                        )}
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <div className="popup-price">
+                                  <table className="popup-price-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Price Details</th>
+                                        <th
+                                          style={{
+                                            textAlign: "end",
+                                            paddingRight: "20px",
+                                          }}
+                                        >
+                                          Price
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td>Base Price</td>
+                                        <td
+                                          style={{
+                                            textAlign: "end",
+                                            paddingRight: "20px",
+                                          }}
+                                        >
+                                          ₹
+                                          {data?.bookingwise_payment
+                                            ?.base_fee ?? 0}
+                                        </td>
+                                      </tr>
+
+                                      <tr>
+                                        <td>Parking Fees</td>
+                                        <td
+                                          style={{
+                                            textAlign: "end",
+                                            paddingRight: "20px",
+                                          }}
+                                        >
+                                          ₹
+                                          {data?.bookingwise_payment
+                                            ?.parking_fee ?? 0}
+                                        </td>
+                                      </tr>
+
+                                      <tr>
+                                        <td>Convenience fee</td>
+                                        <td
+                                          style={{
+                                            textAlign: "end",
+                                            paddingRight: "20px",
+                                          }}
+                                        >
+                                          ₹
+                                          {data?.bookingwise_payment
+                                            ?.convenience_fee ?? 0}
+                                        </td>
+                                      </tr>
+
+                                      <tr>
+                                        <td>Total Amount</td>
+                                        <td
+                                          style={{
+                                            textAlign: "end",
+                                            paddingRight: "20px",
+                                          }}
+                                        >
+                                          <span
+                                            style={{
+                                              fontWeight: "bold",
+                                              color: "black",
+                                            }}
+                                          >
+                                            ₹
+                                            {data?.bookingwise_payment
+                                              ?.amount ?? 0}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button
+                                style={{
+                                  backgroundColor: "#d3d4d5",
+                                  border: "none",
+                                  color: "black",
+                                }}
+                                onClick={handleClose}
+                              >
+                                Close
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
+                        </>
+                      )}
+
+                      <td>{data?.charger?.id}</td>
+
+                      <td style={{ textAlign: "left" }}>
+                        {data?.user?.name}
+                        <br />
+                        <span style={{ color: " rgb(73, 80, 87)" }}>
+                          {data?.user?.phone}
+                        </span>
+                      </td>
+
+                      <td>{data?.station?.station_name}</td>
+
+                      <td>
+                        <div style={{ position: "relative" }}>
+                          <img
+                            className="img-connector"
+                            src={`https://api.mnil.hashtechy.space/${data?.connector?.connector_img}`}
+                          />
+
+                          <span
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              backgroundColor: "#f1f1f1",
+                              color: "#000",
+                              borderRadius: "50%",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 500,
+                              fontSize: "12px",
+                              position: "absolute",
+                              display: "inline-flex",
+                            }}
+                          >
+                            {data?.charger_position.charAt(0).toUpperCase()}
+                          </span>
+                          <br />
+                          {data?.connector?.connector_type}
+                        </div>
+                      </td>
+
+                      <td>
+                        <p
+                          style={{
+                            height: "auto",
+                            paddingTop: "5px",
+                            paddingBottom: "5px",
+                          }}
+                          className={
+                            data?.status === "Completed"
+                              ? "alert alert-success border border-success"
+                              : data?.status === "Pending"
+                              ? "alert alert-warning border border-warning"
+                              : data?.status === "Cancelled"
+                              ? "alert alert-danger border border-danger"
+                              : data?.status === "Confirmed"
+                              ? "alert alert-info border border-info"
+                              : data?.status === "Ongoing"
+                              ? "alert border border-dark"
+                              : ""
+                          }
+                        >
+                          {data?.status}
+                        </p>
+                      </td>
+
+                      <td>
+                        {moment
+                          .tz(data?.booked_start_time, "Asia/Kolkata")
+                          .format("YYYY-MM-DD")}
+                        <br />
+                        <span style={{ color: "black", fontWeight: "bold" }}>
+                          {" "}
+                          {moment
+                            .tz(data?.booked_start_time, "Asia/Kolkata")
+                            .format("hh:mm A")}
+                        </span>
+                      </td>
+                      <td>₹{data?.bookingwise_payment?.amount ?? 0}/-</td>
+
+                      <td>
+                        {data?.bookingwise_payment?.payment_method ?? "-"}
+                      </td>
+                      <td>
+                        {data?.status === "Confirmed" ? (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={
+                              <Tooltip id="tooltip-cancel">Cancel</Tooltip>
+                            }
+                          >
+                            <button
+                              className="cancel-btn"
+                              onClick={handleSelectOpen}
+                            >
+                              <img src="./cross.svg" alt="" />
+                            </button>
+                          </OverlayTrigger>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
@@ -748,7 +808,7 @@ export default function Booking() {
 
           <Modal.Body>
             <label style={{ fontSize: "16px" }}>
-              Connector Type<span>*</span>
+              Connector Type<span className="span1">*</span>
             </label>
             <Select
               className="custom-select"

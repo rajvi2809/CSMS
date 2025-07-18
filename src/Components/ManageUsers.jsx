@@ -1,3 +1,7 @@
+import Select from "react-select";
+import { Form, Field, Formik, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useDebounce } from "use-debounce";
 import Skeleton from "react-loading-skeleton";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
@@ -11,15 +15,24 @@ import { toast } from "react-toastify";
 
 import "../Static/manageUsers.css";
 export default function ManageUsers() {
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
   const [topFilter, setTopFilter] = useState(false);
   const [allData, setallData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [stationToArchive, setstationToArchive] = useState(null);
-  const [stationToRestore, setstationToRestore] = useState(null);
+  const [userToArchive, setuserToArchive] = useState(null);
+  const [userToRestore, setuserToRestore] = useState(null);
   const [activeCard, setActiveCard] = useState("total");
   const [show, setShow] = useState(false);
   const [isArchive, setisArchive] = useState(false);
+  const [showUser, setShowUser] = useState(false);
+  const [modalType, setmodaltype] = useState("");
+  const [updateID, setUpdateID] = useState(null);
+  const [addUser, setaddUser] = useState(false);
+  const [userOptions, setuserOptions] = useState([]);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [records, setRecords] = useState({
     total_records: 0,
@@ -37,8 +50,143 @@ export default function ManageUsers() {
     total_pages: 1,
   });
 
+  const initialValues = () => {
+    if (modalType === "add") {
+      return {
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        role: "",
+        password: "",
+      };
+    }
+  };
+
+  const validationSchema = Yup.object({
+    first_name: Yup.string()
+      .min(2, "Enter atleast 2 characters for First Name")
+      .required("First name is required"),
+    last_name: Yup.string()
+      .min(2, "Enter atleast 2 characters for Last Name")
+      .required("Last name is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    phone: Yup.string()
+      .required("Phone Number is Required")
+      .length(10, "Enter Valid Phone Number"),
+    role: Yup.string().required("Role is Required"),
+    password: Yup.string().required("Password is Required"),
+  });
+
+  const validate = (values) => {
+    let errors = {};
+    if (!values.email) {
+      errors.email = "Email is Required";
+    } else if (
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(values.email)
+    ) {
+      errors.email = "Please enter a valid email";
+    }
+    return errors;
+  };
+
+  const fetchOptions = async () => {
+    try {
+      const response = await axios.get(`/role`);
+      console.log("Response options", response?.data?.data);
+      const dynamicOptions = response?.data?.data.map((item) => ({
+        value: item.role,
+        label: item.role,
+      }));
+
+      setuserOptions(dynamicOptions);
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
+
+  const handleSubmit = async (values) => {
+    if (modalType === "add") {
+      try {
+        // First create the user
+        const response = await axios.post(`/user/register`, values);
+        console.log("User created:", response?.data?.data);
+
+        if (response?.data?.code === 200) {
+          const newUser = response?.data?.data;
+
+          setallData((prevData) => [newUser, ...prevData]);
+
+          setRecords((prevRecords) => ({
+            total_records: prevRecords.total_records + 1,
+            active_records: prevRecords.active_records + 1,
+            archived_records: prevRecords.archived_records,
+          }));
+
+          toast.success(response?.data?.message);
+
+          handleCloseUser();
+        }
+      } catch (error) {
+        console.log("Error creating user", error);
+        toast.error("Failed to create user");
+      }
+    }
+    console.log("Values on Submit", values);
+  };
+
+  // const handleSubmit = async (values) => {
+  //   if (modalType === "add" || setaddUser) {
+  //     {
+  //       try {
+  //         const response = await axios.get(`/user/register`);
+  //         console.log(response?.data?.data);
+  //       } catch (error) {
+  //         console.log("Error", error);
+  //       }
+  //     }
+  //   }
+  //   console.log("Values on Submit", values);
+  // };
+  function generateSimplePassword() {
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789";
+    const symbols = "!@#$%";
+
+    // Create a base character set without symbols
+    const baseChars = uppercase + lowercase + numbers;
+
+    // Generate first 9 characters from base character set
+    let password = "";
+    for (let i = 0; i < 9; i++) {
+      password += baseChars.charAt(
+        Math.floor(Math.random() * baseChars.length)
+      );
+    }
+
+    // Add one guaranteed symbol at random position
+    const randomPosition = Math.floor(Math.random() * 10);
+    const randomSymbol = symbols.charAt(
+      Math.floor(Math.random() * symbols.length)
+    );
+
+    // Insert the symbol at random position
+    password =
+      password.slice(0, randomPosition) +
+      randomSymbol +
+      password.slice(randomPosition);
+
+    return password;
+  }
+
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const handleCloseUser = () => setShowUser(false);
+  const handleShowUser = () => setShowUser(true);
 
   const handleFilterOpt = () => setTopFilter(!topFilter);
 
@@ -64,6 +212,10 @@ export default function ManageUsers() {
         archived_records: prevRecords.archived_records + 1,
       }));
 
+      if (response?.data?.code === 204) {
+        setallData([]);
+      }
+
       if (activeCard === "active") {
         setallData((prevData) =>
           prevData.filter((charging) => charging.id !== chargingId)
@@ -76,23 +228,23 @@ export default function ManageUsers() {
     }
   };
 
-  const handleRestoreStation = async (stationId) => {
+  const handleRestoreUser = async (userId) => {
     try {
       // const token = cookies.accessToken;
       // if (!token) {
       //   console.log("No Token");
       //   return;
       // }
-      const response = await axios.delete(`user/restore/${stationId}`);
+      const response = await axios.delete(`user/restore/${userId}`);
       console.log("Restore response", response);
 
       setallData((prevData) => {
-        const updatedData = prevData.map((station) =>
-          station.id === stationId ? { ...station, deletedAt: null } : station
+        const updatedData = prevData.map((user) =>
+          user.id === userId ? { ...user, deletedAt: null } : user
         );
 
         if (activeCard === "archived") {
-          return updatedData.filter((station) => station.deletedAt !== null);
+          return updatedData.filter((user) => user.deletedAt !== null);
         }
 
         return updatedData;
@@ -119,6 +271,7 @@ export default function ManageUsers() {
           page: page,
           ...(filters.active ? { active: true } : {}),
           ...(filters.archived ? { archived: true } : {}),
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
         },
       });
 
@@ -133,6 +286,8 @@ export default function ManageUsers() {
           current_page: response?.data?.pagination?.current_page || page,
           total_pages: response?.data?.pagination?.total_pages || 1,
         });
+      } else if (response?.data?.code === 204) {
+        setallData([]);
       }
     } catch (error) {
       console.log("Error", error);
@@ -162,6 +317,7 @@ export default function ManageUsers() {
       console.log("Scroll error", error);
     }
   };
+
   useEffect(() => {
     setallData([]);
     //console.log(page);
@@ -171,7 +327,7 @@ export default function ManageUsers() {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page, filters]);
+  }, [page, filters, debouncedSearchText]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -197,16 +353,17 @@ export default function ManageUsers() {
           </button>
         </OverlayTrigger>
         <button
+          style={{ width: "154px" }}
           className="add-station-btn"
           onClick={() => {
-            handleShowStation();
+            setmodaltype("add");
+            handleShowUser();
             fetchOptions();
-            fetchAmenities();
-            // handleEditClick();
+            setaddUser(true);
           }}
         >
           <img className="add-icon"></img>
-          <p style={{ fontSize: "1rem" }}>Add Stations</p>
+          <p style={{ fontSize: "1rem" }}>Create User</p>
         </button>
       </div>
       <div className="details-section">
@@ -223,7 +380,7 @@ export default function ManageUsers() {
             );
           }}
           style={{
-            width: "199px",
+            width: "174px",
             height: "92px",
             marginLeft: "10px",
             border: "none",
@@ -239,10 +396,10 @@ export default function ManageUsers() {
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
-              minWidth: "177px",
+              minWidth: "156px",
             }}
           >
-            Total Stations
+            Total Users
             <div
               style={{
                 marginLeft: "33px",
@@ -280,7 +437,7 @@ export default function ManageUsers() {
             );
           }}
           style={{
-            width: "215px",
+            width: "186px",
             height: "92px",
             marginLeft: "10px",
             border: "none",
@@ -298,10 +455,10 @@ export default function ManageUsers() {
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
-              minWidth: "196px",
+              minWidth: "165px",
             }}
           >
-            Active Stations
+            Active Users
             <div
               style={{
                 marginLeft: "33px",
@@ -337,7 +494,7 @@ export default function ManageUsers() {
             setPage(1);
           }}
           style={{
-            width: "225px",
+            width: "196px",
             height: "92px",
             marginLeft: "10px",
             border: "none",
@@ -354,10 +511,10 @@ export default function ManageUsers() {
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
-              width: "207px",
+              width: "176px",
             }}
           >
-            Archive Stations
+            Archive Users
             <div
               style={{
                 marginLeft: "33px",
@@ -381,7 +538,6 @@ export default function ManageUsers() {
           </Card.Text>
         </Card>
       </div>
-
       <div className="content-wrapper">
         <Collapse in={topFilter}>
           <div className="filter-section" id="example-collapse-text">
@@ -399,6 +555,11 @@ export default function ManageUsers() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -417,7 +578,7 @@ export default function ManageUsers() {
                 </tr>
               </thead>
               <tbody>
-                {allData.length === 0 ? (
+                {allData.length === 0 && !loading ? (
                   <tr>
                     <td colSpan={6} style={{ padding: "100px 0" }}>
                       <div
@@ -475,7 +636,15 @@ export default function ManageUsers() {
                               <Tooltip id="button-tooltip">Edit</Tooltip>
                             }
                           >
-                            <button className="edit-btn">
+                            <button
+                              className="edit-btn"
+                              onClick={() => {
+                                setmodaltype("edit");
+                                setUpdateID(item?.id);
+                                handleShowUser();
+                                setaddUser(false);
+                              }}
+                            >
                               <img src="./edit.svg" alt="" />
                             </button>
                           </OverlayTrigger>
@@ -490,7 +659,7 @@ export default function ManageUsers() {
                             <button
                               className="restore-btn"
                               onClick={() => {
-                                setstationToRestore(item?.id);
+                                setuserToRestore(item?.id);
                                 handleShow();
                                 setisArchive(true);
                               }}
@@ -508,7 +677,7 @@ export default function ManageUsers() {
                             <button
                               className="archive-btn"
                               onClick={() => {
-                                setstationToArchive(item?.id);
+                                setuserToArchive(item?.id);
                                 handleShow();
                                 setisArchive(false);
                               }}
@@ -560,7 +729,6 @@ export default function ManageUsers() {
           </div>
         </div>
       </div>
-
       <Modal
         show={show}
         onHide={handleClose}
@@ -591,8 +759,8 @@ export default function ManageUsers() {
               <Button
                 style={{ backgroundColor: "#20b2aa", border: "none" }}
                 onClick={() => {
-                  if (stationToRestore) {
-                    handleRestoreStation(stationToRestore);
+                  if (userToRestore) {
+                    handleRestoreUser(userToRestore);
                     toast.success("User Restored Successfully!");
                     handleClose();
                   }
@@ -625,8 +793,8 @@ export default function ManageUsers() {
               <Button
                 style={{ backgroundColor: "#20b2aa", border: "none" }}
                 onClick={() => {
-                  if (stationToArchive) {
-                    handleArchiveCharging(stationToArchive);
+                  if (userToArchive) {
+                    handleArchiveCharging(userToArchive);
                     toast.success("User Archived Successfully!");
                     handleClose();
                   }
@@ -640,6 +808,307 @@ export default function ManageUsers() {
             </Modal.Footer>
           </>
         )}
+      </Modal>
+      {/* add or edit user */}
+      <Modal
+        show={showUser}
+        onHide={handleCloseUser}
+        backdrop="static"
+        keyboard={false}
+      >
+        <>
+          <Formik
+            initialValues={initialValues()}
+            validate={validate}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ setFieldValue, errors, touched, submitCount, values }) => (
+              <Form>
+                <Modal.Header closeButton className="custom-modelHeader">
+                  <Modal.Title>
+                    {modalType === "add" ? "Create User" : "Update User"}
+                  </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <div style={{ width: "100%", display: "flex", gap: "10px" }}>
+                    <div
+                      style={{ width: "50%" }}
+                      className={`form-floating mb-3 m_input ${
+                        submitCount > 0 &&
+                        touched.first_name &&
+                        !errors.first_name
+                          ? "is-valid"
+                          : ""
+                      }`}
+                    >
+                      <Field
+                        type="text"
+                        name="first_name"
+                        className="form-control input-brand"
+                        id="floatingFirstName"
+                        placeholder="First Name"
+                      />
+                      <label
+                        htmlFor="floatingFirstName"
+                        style={{ top: "1.5px", left: "6px" }}
+                      >
+                        First Name<span className="span1"> *</span>
+                      </label>
+                      <ErrorMessage
+                        name="first_name"
+                        component="div"
+                        className="error-div"
+                      />
+                    </div>
+
+                    {/* Last Name Field */}
+                    <div
+                      style={{ width: "50%" }}
+                      className={`form-floating mb-3 m_input ${
+                        submitCount > 0 &&
+                        touched.last_name &&
+                        !errors.last_name
+                          ? "is-valid"
+                          : ""
+                      }`}
+                    >
+                      <Field
+                        type="text"
+                        name="last_name"
+                        className="form-control input-brand"
+                        id="floatingLastName"
+                        placeholder="Last Name"
+                      />
+                      <label
+                        htmlFor="floatingLastName"
+                        style={{ top: "1.5px", left: "6px" }}
+                      >
+                        Last Name<span className="span1"> *</span>
+                      </label>
+                      <ErrorMessage
+                        name="last_name"
+                        component="div"
+                        className="error-div"
+                      />
+                    </div>
+                  </div>
+
+                  <div
+                    className={`form-floating mb-3 m_input ${
+                      submitCount > 0 && touched.email && !errors.email
+                        ? "is-valid"
+                        : ""
+                    }`}
+                  >
+                    <Field
+                      type="email"
+                      name="email"
+                      className="form-control input-brand"
+                      id="floatingEmail"
+                      placeholder="Email"
+                    />
+                    <label
+                      htmlFor="floatingEmail"
+                      style={{ top: "1.5px", left: "6px" }}
+                    >
+                      Email<span className="span1"> *</span>
+                    </label>
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="error-div"
+                    />
+                  </div>
+
+                  <div
+                    className={`form-floating mb-3 m_input ${
+                      submitCount > 0 && touched.phone && !errors.phone
+                        ? "is-valid"
+                        : ""
+                    }`}
+                  >
+                    <Field
+                      type="tel"
+                      name="phone"
+                      className="form-control input-brand"
+                      id="floatingPhone"
+                      placeholder="Phone Number"
+                      onInput={(e) => {
+                        e.target.value = e.target.value.replace(/\D/g, "");
+
+                        if (
+                          e.target.value.length > 0 &&
+                          !/^[789]/.test(e.target.value)
+                        ) {
+                          e.target.value = "";
+                        }
+
+                        if (e.target.value.length > 10) {
+                          e.target.value = e.target.value.slice(0, 10);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="floatingPhone"
+                      style={{ top: "1.5px", left: "6px" }}
+                    >
+                      Phone Number<span className="span1"> *</span>
+                    </label>
+                    <ErrorMessage
+                      name="phone"
+                      component="div"
+                      className="error-div"
+                    />
+                  </div>
+
+                  <div
+                    className={`charging-input-select m_input ${
+                      submitCount > 0 && touched.role && !errors.role
+                        ? "is-valid"
+                        : ""
+                    }`}
+                    style={{ width: "466.67px", marginBottom: "1rem" }}
+                  >
+                    <h6 style={{ marginBottom: "5px" }}>
+                      User Type<span className="span1">*</span>
+                    </h6>
+                    <Field name="role">
+                      {({
+                        field,
+                        form: { setFieldValue, setFieldTouched },
+                      }) => (
+                        <Select
+                          isClearable={true}
+                          className="input-brand"
+                          options={userOptions}
+                          name="role"
+                          value={userOptions.find(
+                            (option) => option.value === field.value
+                          )}
+                          onChange={(option) => {
+                            setFieldValue("role", option ? option.value : "");
+                          }}
+                          onBlur={() => setFieldTouched("role", true)}
+                          placeholder="Select Role"
+                          styles={{
+                            control: (baseStyles) => ({
+                              ...baseStyles,
+                              minHeight: "36px",
+                              minWidth: "256px",
+                              borderColor: "rgb(222,226,230)",
+                              boxShadow: "none",
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              backgroundColor: state.isFocused
+                                ? "rgb(32,178,170)"
+                                : "white",
+                              color: state.isFocused ? "white" : "black",
+                              cursor: "pointer",
+                            }),
+                            menu: (base) => ({
+                              ...base,
+                              backgroundColor: "white",
+                              zIndex: 9999,
+                            }),
+                            menuList: (base) => ({
+                              ...base,
+                              padding: 0,
+                              backgroundColor: "white",
+                            }),
+                          }}
+                        />
+                      )}
+                    </Field>
+                    {touched.role && errors.role && (
+                      <div className="error-div">{errors.role}</div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <div
+                      className="form-floating mb-3 m_input"
+                      style={{ width: "409px" }}
+                    >
+                      <Field
+                        disabled
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        className="form-control input-login"
+                        id="floatingPassword"
+                        placeholder="Password"
+                        style={{ width: "100%", margin: "0px" }}
+                      />
+
+                      <label
+                        htmlFor="floatingPassword"
+                        style={{ top: "1.5px", left: "6px", fontSize: "16px" }}
+                      >
+                        Password<span className="span1"> *</span>
+                      </label>
+                      <img
+                        src="/eye.svg"
+                        className="set-icon"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ right: "8px", top: "30px" }}
+                      />
+
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="error-div"
+                      />
+                    </div>
+                    <div>
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={
+                          <Tooltip id="button-tooltip">
+                            Generate password
+                          </Tooltip>
+                        }
+                      >
+                        <button
+                          className="pass-btn"
+                          type="button"
+                          onClick={() => {
+                            const newPassword = generateSimplePassword();
+                            setFieldValue("password", newPassword);
+                          }}
+                        >
+                          <img
+                            src="./passGenerate.svg"
+                            alt="Generate password"
+                            style={{ height: "24px", width: "24px" }}
+                          />
+                        </button>
+                      </OverlayTrigger>
+                    </div>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    style={{
+                      backgroundColor: "#d3d4d5",
+                      border: "none",
+                      color: "black",
+                    }}
+                    onClick={handleCloseUser}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    style={{ backgroundColor: "#20b2aa", border: "none" }}
+                  >
+                    {modalType === "add" ? "Add" : "Update"}
+                  </Button>
+                </Modal.Footer>
+              </Form>
+            )}
+          </Formik>
+        </>
       </Modal>
     </>
   );

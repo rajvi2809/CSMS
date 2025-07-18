@@ -1,3 +1,4 @@
+import { useDebounce } from "use-debounce";
 import Skeleton from "react-loading-skeleton";
 import Collapse from "react-bootstrap/Collapse";
 import BootstrapForm from "react-bootstrap/Form";
@@ -14,6 +15,8 @@ import { toast } from "react-toastify";
 import "../static/brandManagement.css";
 
 export default function BrandsManagement() {
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
   const [topFilter, setTopFilter] = useState(false);
   const [allData, setallData] = useState([]);
   const [page, setPage] = useState(1);
@@ -73,13 +76,20 @@ export default function BrandsManagement() {
         params: {
           limit: 15,
           page: page,
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
         },
       });
 
       console.log(response.data);
       const newData = response?.data?.data || [];
+      if (page === 1) {
+        setallData(newData);
+      } else if (response?.data?.code === 204) {
+        setallData([]);
+      } else {
+        setallData((prevData) => [...prevData, ...newData]);
+      }
 
-      setallData((prevData) => [...prevData, ...newData]);
       setCardData(response?.data?.record_counts);
 
       setPagination({
@@ -192,7 +202,7 @@ export default function BrandsManagement() {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page]);
+  }, [page, debouncedSearchText]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -271,7 +281,33 @@ export default function BrandsManagement() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
+                {/* {searchText && (
+                  <button
+                    onClick={() => {
+                      setPage(1);
+                      setSearchText("");
+                      setallData([]);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      marginLeft: "40px",
+                    }}
+                  >
+                    <img
+                      src="/close.svg"
+                      alt=""
+                      style={{ height: "20px", width: "20px" }}
+                    />
+                  </button>
+                )} */}
               </div>
             </div>
           </div>
@@ -287,56 +323,94 @@ export default function BrandsManagement() {
                 </tr>
               </thead>
               <tbody>
-                {allData.map((item) => (
+                {allData?.length === 0 && !loading ? (
                   <tr>
-                    <td>
-                      <img
+                    <td colSpan={6} style={{ padding: "100px 0" }}>
+                      <div
                         style={{
-                          height: "70px",
-                          width: "70px",
-                          border: "1px solid #e9ecef",
-                          borderRadius: ".375rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
                         }}
-                        src={`https://api.mnil.hashtechy.space${item?.brand_img}`}
-                      />
-                    </td>
-                    <td>{item?.brand_name}</td>
-                    <td>
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
                       >
-                        <button
-                          className="edit-btn"
-                          onClick={() => {
-                            setModalType("edit");
-                            setEditBrandID(item?.id);
-                            setaddBrand(false);
-                            handleShow();
+                        <img
+                          src="/noRecords.png"
+                          alt="No Records Found"
+                          style={{
+                            width: "170px",
+                            marginBottom: "20px",
+                            transform: "translateX(-20px)",
+                          }}
+                        />
+                        <p
+                          style={{
+                            fontSize: "20px",
+                            fontWeight: "600",
+                            color: "#000",
+                            transform: "translateX(-20px)",
                           }}
                         >
-                          <img src="./edit.svg" alt="" />
-                        </button>
-                      </OverlayTrigger>
-
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip id="button-tooltip">Delete</Tooltip>}
-                      >
-                        <button
-                          className="delete-btn"
-                          onClick={() => {
-                            handleShow();
-                            setModalType("delete");
-                            setdeleteBrandID(item?.id);
-                          }}
-                        >
-                          <img src="./delete.svg" alt="" />
-                        </button>
-                      </OverlayTrigger>
+                          No Records Found
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  allData.map((item) => (
+                    <tr>
+                      <td>
+                        <img
+                          style={{
+                            height: "70px",
+                            width: "70px",
+                            border: "1px solid #e9ecef",
+                            borderRadius: ".375rem",
+                          }}
+                          src={`https://api.mnil.hashtechy.space${item?.brand_img}`}
+                        />
+                      </td>
+                      <td>{item?.brand_name}</td>
+                      <td>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
+                        >
+                          <button
+                            className="edit-btn"
+                            onClick={() => {
+                              setModalType("edit");
+                              setEditBrandID(item?.id);
+                              setaddBrand(false);
+                              handleShow();
+                            }}
+                          >
+                            <img src="./edit.svg" alt="" />
+                          </button>
+                        </OverlayTrigger>
+
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip id="button-tooltip">Delete</Tooltip>
+                          }
+                        >
+                          <button
+                            className="delete-btn"
+                            onClick={() => {
+                              handleShow();
+                              setModalType("delete");
+                              setdeleteBrandID(item?.id);
+                            }}
+                          >
+                            <img src="./delete.svg" alt="" />
+                          </button>
+                        </OverlayTrigger>
+                      </td>
+                    </tr>
+                  ))
+                )}
                 {loading && (
                   <tr>
                     <td>
@@ -448,7 +522,7 @@ export default function BrandsManagement() {
                         htmlFor="floatingName"
                         style={{ top: "1.5px", left: "6px" }}
                       >
-                        Brand Name<span> *</span>
+                        Brand Name<span className="span1"> *</span>
                       </label>
                       <ErrorMessage
                         name="brand_name"
@@ -473,7 +547,7 @@ export default function BrandsManagement() {
                           marginBottom: "0.25rem",
                         }}
                       >
-                        Brand Logo<span> *</span>
+                        Brand Logo<span className="span1"> *</span>
                       </label>
 
                       <BootstrapForm.Control

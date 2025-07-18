@@ -1,3 +1,4 @@
+import { useDebounce } from "use-debounce";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
@@ -21,6 +22,8 @@ export default function Users() {
   const [userToRestore, setuserToRestore] = useState(null);
   const [activeCard, setActiveCard] = useState("total");
   const [isArchive, setisArchive] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
 
   const [records, setRecords] = useState({
     total_records: 0,
@@ -120,19 +123,26 @@ export default function Users() {
           page: page,
           ...(filters.active ? { active: true } : {}),
           ...(filters.archived ? { archived: true } : {}),
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
         },
       });
 
       console.log(response?.data);
       if (response?.data?.code === 200) {
         const newData = response?.data?.data || [];
-        setallData((prevData) => [...prevData, ...newData]);
+
+        if (page === 1) {
+          setallData(newData);
+        }
+
         setRecords(response?.data?.record_counts || {});
 
         setPagination({
           current_page: response?.data?.pagination?.current_page || page,
           total_pages: response?.data?.pagination?.total_pages || 1,
         });
+      } else if (response?.data?.code === 204) {
+        setallData([]);
       }
     } catch (error) {
       console.log("Error", error);
@@ -163,16 +173,16 @@ export default function Users() {
     }
   };
 
-  useEffect(() => {
-    setallData([]);
-    console.log(page);
-  }, [filters]);
+  // useEffect(() => {
+  //   setallData([]);
+  //   //console.log(page);
+  // }, [filters]);
 
   useEffect(() => {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page, filters]);
+  }, [page, filters, debouncedSearchText]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -387,6 +397,11 @@ export default function Users() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
               </div>
             </div>

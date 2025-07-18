@@ -338,7 +338,6 @@ export default function ConnectorManagement() {
           backdropFilter: "blur(2px)",
         }}
         centered
-        size="lg"
       >
         {modalType === "delete" ? (
           <Modal.Body style={{ textAlign: "center" }}>
@@ -402,7 +401,7 @@ export default function ConnectorManagement() {
                         id="connector_type"
                       />
                       <label htmlFor="connector_type">
-                        Connector Name<span>*</span>
+                        Connector Name<span className="span1">*</span>
                       </label>
                       <ErrorMessage
                         name="connector_type"
@@ -424,7 +423,7 @@ export default function ConnectorManagement() {
                           id="max_power_output"
                         />
                         <label htmlFor="max_power_output">
-                          Max Output Power(kw)<span>*</span>
+                          Max Output Power(kw)<span className="span1">*</span>
                         </label>
                         <ErrorMessage
                           name="max_power_output"
@@ -442,7 +441,8 @@ export default function ConnectorManagement() {
                           id="max_current_output"
                         />
                         <label htmlFor="max_current_output">
-                          Max Current Output(Amps)<span>*</span>
+                          Max Current Output(Amps)
+                          <span className="span1">*</span>
                         </label>
                         <ErrorMessage
                           name="max_current_output"
@@ -458,7 +458,7 @@ export default function ConnectorManagement() {
                     >
                       <div className="charging-input-select m_input">
                         <h6 style={{ marginBottom: "5px" }}>
-                          Connector Level<span>*</span>
+                          Connector Level<span className="span1">*</span>
                         </h6>
                         <Select
                           options={[
@@ -506,7 +506,7 @@ export default function ConnectorManagement() {
 
                       <div className="charging-input-select m_input">
                         <h6 style={{ marginBottom: "5px" }}>
-                          Current Type<span>*</span>
+                          Current Type<span className="span1">*</span>
                         </h6>
                         <Select
                           options={[
@@ -554,7 +554,7 @@ export default function ConnectorManagement() {
 
                     <div className="m_input" style={{ marginBottom: "16px" }}>
                       <h6 style={{ marginBottom: "5px" }}>
-                        Connector Image<span>*</span>
+                        Connector Image<span className="span1">*</span>
                       </h6>
                       <input
                         type="file"

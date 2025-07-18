@@ -403,7 +403,7 @@ export default function FeesManagement() {
                     style={{ width: "466.67px", marginBottom: "1rem" }}
                   >
                     <h6 style={{ marginBottom: "5px" }}>
-                      Station<span>*</span>
+                      Station<span className="span1">*</span>
                     </h6>
                     <Select
                       isClearable={true}
@@ -463,7 +463,7 @@ export default function FeesManagement() {
                       htmlFor="floatingStationName"
                       style={{ top: "1.5px", left: "6px" }}
                     >
-                      Station<span> *</span>
+                      Station<span className="span1"> *</span>
                     </label>
                   </div>
                 )}
@@ -528,7 +528,7 @@ export default function FeesManagement() {
                     htmlFor="floatingName"
                     style={{ top: "1.5px", left: "6px" }}
                   >
-                    Base fee<span> *</span>
+                    Base fee<span className="span1"> *</span>
                   </label>
                   <ErrorMessage
                     name="base_fee"
@@ -604,7 +604,7 @@ export default function FeesManagement() {
                     htmlFor="floatingName"
                     style={{ top: "1.5px", left: "6px" }}
                   >
-                    Instant Booking Base fee<span> *</span>
+                    Instant Booking Base fee<span className="span1"> *</span>
                   </label>
                   <ErrorMessage
                     name="instant_booking_base_fee"
@@ -679,7 +679,7 @@ export default function FeesManagement() {
                     htmlFor="floatingName"
                     style={{ top: "1.5px", left: "6px" }}
                   >
-                    Parking fee<span> *</span>
+                    Parking fee<span className="span1"> *</span>
                   </label>
                   <ErrorMessage
                     name="parking_fee"
@@ -826,7 +826,7 @@ export default function FeesManagement() {
                       }}
                     />
                     <label htmlFor="convenience_fee">
-                      Convenience Fee<span>*</span>
+                      Convenience Fee<span className="span1">*</span>
                     </label>
                     <ErrorMessage
                       name="convenience_fee"

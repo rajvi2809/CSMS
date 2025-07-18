@@ -419,7 +419,7 @@ export default function AmenityManagement() {
                         htmlFor="floatingName"
                         style={{ top: "1.5px", left: "6px" }}
                       >
-                        Amenity Name<span> *</span>
+                        Amenity Name<span className="span1"> *</span>
                       </label>
                       <ErrorMessage
                         name="amenity_name"
@@ -444,7 +444,7 @@ export default function AmenityManagement() {
                           marginBottom: "0.25rem",
                         }}
                       >
-                        Amenity Logo<span> *</span>
+                        Amenity Logo<span className="span1"> *</span>
                       </label>
 
                       <BootstrapForm.Control

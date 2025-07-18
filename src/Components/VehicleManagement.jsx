@@ -1,3 +1,4 @@
+import { useDebounce } from "use-debounce";
 import Skeleton from "react-loading-skeleton";
 import Collapse from "react-bootstrap/Collapse";
 import { useState, useEffect } from "react";
@@ -7,6 +8,8 @@ import Tooltip from "react-bootstrap/Tooltip";
 import axios from "axios";
 import "../Static/vehiclemanagement.css";
 export default function VehicleManagement() {
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
   const [allData, setallData] = useState([]);
   const [topFilter, setTopFilter] = useState(false);
   const [page, setPage] = useState(1);
@@ -38,6 +41,7 @@ export default function VehicleManagement() {
           page: page,
           ...(filters.active ? { active: true } : {}),
           ...(filters.archived ? { archived: true } : {}),
+          ...(debouncedSearchText && { search_term: debouncedSearchText }),
         },
       });
 
@@ -51,6 +55,12 @@ export default function VehicleManagement() {
         setPagination({
           current_page: response?.data?.pagination?.current_page || page,
           total_pages: response?.data?.pagination?.total_pages || 1,
+        });
+      } else if (response?.data?.code === 204) {
+        setallData([]);
+        setPagination({
+          current_page: 1,
+          total_pages: 1,
         });
       }
     } catch (error) {
@@ -92,7 +102,7 @@ export default function VehicleManagement() {
     if (page <= pagination.total_pages) {
       fetchdata();
     }
-  }, [page, filters]);
+  }, [page, filters, debouncedSearchText]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollEvent);
@@ -317,6 +327,11 @@ export default function VehicleManagement() {
                   type="text"
                   placeholder="Search Here..."
                   style={{ all: "unset" }}
+                  value={searchText}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchText(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -335,119 +350,160 @@ export default function VehicleManagement() {
                 </tr>
               </thead>
               <tbody>
-                {allData.map((item) => (
-                  <tr key={item?.id}>
-                    <td>
-                      <div style={{ display: "flex", gap: "10px" }}>
-                        <div>
-                          <img
-                            src={
-                              item?.vehicle_img?.startsWith("/")
-                                ? `https://api.mnil.hashtechy.space${item.vehicle_img}`
-                                : item?.vehicle_img
-                            }
-                            alt=""
-                            style={{
-                              height: "70px",
-                              width: "70px",
-                              objectFit: "contain",
-                              border: "1px solid #e9ecef",
-                              borderRadius: ".375rem",
-                            }}
-                          />
-                        </div>
-                        <div
-                          style={{ textAlign: "left", alignContent: "center" }}
-                        >
-                          {" "}
-                          {item?.brand?.brand_name} {item?.model}
-                          <br />
-                          {item?.vehicle_type}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>{item?.battery_capacity}</td>
-
-                    <td>{item?.battery_voltage}</td>
-
-                    <td>
+                {allData?.length === 0 && !loading ? (
+                  <tr>
+                    <td colSpan={6} style={{ padding: "100px 0" }}>
                       <div
                         style={{
                           display: "flex",
-                          justifyContent: "center",
+                          flexDirection: "column",
                           alignItems: "center",
-                          height: "100%", // Ensures vertical centering works
-                          minHeight: "80px", // Minimum height to prevent squishing
+                          justifyContent: "center",
+                          height: "100%",
                         }}
                       >
-                        {item?.connectors?.map((connector) => (
-                          <div
-                            key={connector.id}
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              textAlign: "center",
-                            }}
-                          >
-                            <img
-                              style={{
-                                height: "40px",
-                                width: "40px",
-                                objectFit: "contain",
-                              }}
-                              src={`https://api.mnil.hashtechy.space${connector?.connector_img}`}
-                              alt={connector?.connector_type}
-                            />
-                            <div style={{ marginTop: "4px" }}>
-                              <span
-                                style={{ color: "black", fontSize: "12px" }}
-                              >
-                                {connector?.connector_type}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                        <img
+                          src="/noRecords.png"
+                          alt="No Records Found"
+                          style={{
+                            width: "170px",
+                            marginBottom: "20px",
+                            transform: "translateX(-20px)",
+                          }}
+                        />
+                        <p
+                          style={{
+                            fontSize: "20px",
+                            fontWeight: "600",
+                            color: "#000",
+                            transform: "translateX(-20px)",
+                          }}
+                        >
+                          No Records Found
+                        </p>
                       </div>
                     </td>
-
-                    <td>
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
-                      >
-                        <button
-                          className="edit-btn"
-                          onClick={() => {
-                            setModalType("edit");
-                            setaddAmenity(false);
-                            setEditAmenityID(item?.id);
-                            handleShow();
-                          }}
-                        >
-                          <img src="./edit.svg" alt="" />
-                        </button>
-                      </OverlayTrigger>
-
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip id="button-tooltip">Delete</Tooltip>}
-                      >
-                        <button
-                          className="archive-btn"
-                          onClick={() => {
-                            handleShow();
-                            setModalType("delete");
-                            setdeleteAmenityID(item?.id);
-                          }}
-                        >
-                          <img src="./archive.svg" alt="" />
-                        </button>
-                      </OverlayTrigger>
-                    </td>
                   </tr>
-                ))}
+                ) : (
+                  allData.map((item) => (
+                    <tr key={item?.id}>
+                      <td>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <div>
+                            <img
+                              src={
+                                item?.vehicle_img?.startsWith("/")
+                                  ? `https://api.mnil.hashtechy.space${item.vehicle_img}`
+                                  : item?.vehicle_img
+                              }
+                              alt=""
+                              style={{
+                                height: "70px",
+                                width: "70px",
+                                objectFit: "contain",
+                                border: "1px solid #e9ecef",
+                                borderRadius: ".375rem",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              textAlign: "left",
+                              alignContent: "center",
+                            }}
+                          >
+                            {" "}
+                            {item?.brand?.brand_name} {item?.model}
+                            <br />
+                            {item?.vehicle_type}
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>{item?.battery_capacity}</td>
+
+                      <td>{item?.battery_voltage}</td>
+
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100%", // Ensures vertical centering works
+                            minHeight: "80px", // Minimum height to prevent squishing
+                          }}
+                        >
+                          {item?.connectors?.map((connector) => (
+                            <div
+                              key={connector.id}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                textAlign: "center",
+                              }}
+                            >
+                              <img
+                                style={{
+                                  height: "40px",
+                                  width: "40px",
+                                  objectFit: "contain",
+                                }}
+                                src={`https://api.mnil.hashtechy.space${connector?.connector_img}`}
+                                alt={connector?.connector_type}
+                              />
+                              <div style={{ marginTop: "4px" }}>
+                                <span
+                                  style={{ color: "black", fontSize: "12px" }}
+                                >
+                                  {connector?.connector_type}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
+                        >
+                          <button
+                            className="edit-btn"
+                            onClick={() => {
+                              setModalType("edit");
+                              setaddAmenity(false);
+                              setEditAmenityID(item?.id);
+                              handleShow();
+                            }}
+                          >
+                            <img src="./edit.svg" alt="" />
+                          </button>
+                        </OverlayTrigger>
+
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip id="button-tooltip">Delete</Tooltip>
+                          }
+                        >
+                          <button
+                            className="archive-btn"
+                            onClick={() => {
+                              handleShow();
+                              setModalType("delete");
+                              setdeleteAmenityID(item?.id);
+                            }}
+                          >
+                            <img src="./archive.svg" alt="" />
+                          </button>
+                        </OverlayTrigger>
+                      </td>
+                    </tr>
+                  ))
+                )}
                 {loading && (
                   <tr>
                     <td>
