@@ -57,6 +57,7 @@ export default function ManageUsers() {
         last_name: "",
         email: "",
         phone: "",
+        roleId: "",
         role: "",
         password: "",
       };
@@ -76,7 +77,7 @@ export default function ManageUsers() {
     phone: Yup.string()
       .required("Phone Number is Required")
       .length(10, "Enter Valid Phone Number"),
-    role: Yup.string().required("Role is Required"),
+    roleId: Yup.string().required("Role is Required"),
     password: Yup.string().required("Password is Required"),
   });
 
@@ -97,7 +98,7 @@ export default function ManageUsers() {
       const response = await axios.get(`/role`);
       console.log("Response options", response?.data?.data);
       const dynamicOptions = response?.data?.data.map((item) => ({
-        value: item.role,
+        value: item.id,
         label: item.role,
       }));
 
@@ -108,16 +109,31 @@ export default function ManageUsers() {
   };
 
   const handleSubmit = async (values) => {
+    console.log("values ==> ", values);
     if (modalType === "add") {
       try {
-        // First create the user
-        const response = await axios.post(`/user/register`, values);
-        console.log("User created:", response?.data?.data);
+        const payload = {
+          email: values.email,
+          firstname: values.first_name,
+          lastname: values.last_name,
+          password: values.password,
+          phone: values.phone,
+          roleId: values.roleId,
+        };
 
-        if (response?.data?.code === 200) {
-          const newUser = response?.data?.data;
+        const response = await axios.post(`/user/register`, payload);
 
-          setallData((prevData) => [newUser, ...prevData]);
+        if (response?.data?.code === 201) {
+          const newUser = {
+            ...response?.data?.data,
+            role: values.roleId,
+          };
+
+          console.log("New User", newUser);
+          setallData((prevData) => [
+            { ...newUser, role: values?.role },
+            ...prevData,
+          ]);
 
           setRecords((prevRecords) => ({
             total_records: prevRecords.total_records + 1,
@@ -126,30 +142,16 @@ export default function ManageUsers() {
           }));
 
           toast.success(response?.data?.message);
-
-          handleCloseUser();
         }
+
+        handleCloseUser();
       } catch (error) {
         console.log("Error creating user", error);
-        toast.error("Failed to create user");
       }
     }
     console.log("Values on Submit", values);
   };
 
-  // const handleSubmit = async (values) => {
-  //   if (modalType === "add" || setaddUser) {
-  //     {
-  //       try {
-  //         const response = await axios.get(`/user/register`);
-  //         console.log(response?.data?.data);
-  //       } catch (error) {
-  //         console.log("Error", error);
-  //       }
-  //     }
-  //   }
-  //   console.log("Values on Submit", values);
-  // };
   function generateSimplePassword() {
     const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -973,7 +975,7 @@ export default function ManageUsers() {
                     <h6 style={{ marginBottom: "5px" }}>
                       User Type<span className="span1">*</span>
                     </h6>
-                    <Field name="role">
+                    <Field name="roleId">
                       {({
                         field,
                         form: { setFieldValue, setFieldTouched },
@@ -982,14 +984,16 @@ export default function ManageUsers() {
                           isClearable={true}
                           className="input-brand"
                           options={userOptions}
-                          name="role"
+                          name="roleId"
                           value={userOptions.find(
                             (option) => option.value === field.value
                           )}
                           onChange={(option) => {
-                            setFieldValue("role", option ? option.value : "");
+                            setFieldValue("roleId", option ? option.value : "");
+                            setFieldValue("role", option ? option.label : "");
+                            // setFieldValue("role", option ? option.value : "");
                           }}
-                          onBlur={() => setFieldTouched("role", true)}
+                          onBlur={() => setFieldTouched("roleId", true)}
                           placeholder="Select Role"
                           styles={{
                             control: (baseStyles) => ({
@@ -1021,8 +1025,8 @@ export default function ManageUsers() {
                         />
                       )}
                     </Field>
-                    {touched.role && errors.role && (
-                      <div className="error-div">{errors.role}</div>
+                    {touched.roleId && errors.roleId && (
+                      <div className="error-div">{errors.roleId}</div>
                     )}
                   </div>
 

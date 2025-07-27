@@ -486,7 +486,7 @@ export default function VehicleManagement() {
                         <OverlayTrigger
                           placement="top"
                           overlay={
-                            <Tooltip id="button-tooltip">Delete</Tooltip>
+                            <Tooltip id="button-tooltip">Archive</Tooltip>
                           }
                         >
                           <button

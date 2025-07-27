@@ -41,6 +41,7 @@ body {
   height: 69px;
   width: 180px;
   display: block;
+  object-fit: contain;
 }
 
 .sidebar {

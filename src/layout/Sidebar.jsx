@@ -36,7 +36,7 @@ export default function Sidebar() {
     <>
       <aside className={`sidebar ${sideBar ? "open-menu" : ""}`}>
         <div className="logo-div sticky" onClick={handleNavigate}>
-          <img className="logo-img" src="/logomain.svg" alt="" />
+          <img className="logo-img" src="/pngnew.png" alt="" />
           {/* <sub className="sub-class">SUPER ADMIN</sub><small>v 1.0</small> */}
         </div>
         <div className="list">
@@ -127,23 +127,6 @@ export default function Sidebar() {
               )}
             </NavLink>
 
-            {/* <NavLink to="/charger-management">
-              {({ isActive }) => (
-                <li className={`line-wrapper ${isActive ? "active" : ""}`}>
-                  <img
-                    style={{
-                      backgroundColor: "#adb5bd",
-                      WebkitMask: "url(/charger.svg) no-repeat center",
-                      mask: "url(/charger.svg) no-repeat center",
-                      WebkitMaskSize: "contain",
-                      maskSize: "contain",
-                    }}
-                  />
-                  <p>Chargers </p>
-                </li>
-              )}
-            </NavLink> */}
-
             <li
               className={`line-wrapper ${isOpen && "active"}`}
               onClick={toggleList}
@@ -193,13 +176,6 @@ export default function Sidebar() {
                   {({ isActive }) => (
                     <li className={`inner-list ${isActive ? "active" : ""}`}>
                       Amenities
-                    </li>
-                  )}
-                </NavLink>
-                <NavLink to="/content-management">
-                  {({ isActive }) => (
-                    <li className={`inner-list ${isActive ? "active" : ""}`}>
-                      Contents
                     </li>
                   )}
                 </NavLink>

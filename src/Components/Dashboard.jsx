@@ -229,6 +229,16 @@ export default function Dashboard() {
 
       <div className="content-wrapper">
         <div className="main-content">
+          <h5
+            style={{
+              marginTop: "10px",
+              marginBottom: "1.5rem!important",
+              marginLeft: "6px",
+              fontWeight: "500",
+            }}
+          >
+            Top Performing Charging Stations by Revenue
+          </h5>
           <table className="main-table" style={{ width: "100%" }}>
             <thead>
               <tr>

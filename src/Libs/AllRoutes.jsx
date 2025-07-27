@@ -18,7 +18,6 @@ import AmenityManagement from "../Components/AmenityManagement";
 import ConnectorManagement from "../Components/ConnectorManagement";
 import VehicleManagement from "../Components/VehicleManagement";
 import FeesManagement from "../Components/FeesManagement";
-import ContentManagement from "../Components/ContentManagement";
 import ManageRoles from "../Components/ManageRoles";
 import ManageUsers from "../Components/ManageUsers";
 
@@ -76,11 +75,6 @@ const AllRoutes = () => {
           <Route
             path="/connectors-management"
             element={<ConnectorManagement />}
-          ></Route>
-
-          <Route
-            path="/content-management"
-            element={<ContentManagement />}
           ></Route>
 
           <Route path="/fee-management" element={<FeesManagement />}></Route>

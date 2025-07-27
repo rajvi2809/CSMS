@@ -727,6 +727,58 @@ export default function ChargingStations() {
                       </td>
 
                       <td style={{ minWidth: "97px" }}>
+                        {!data?.deletedAt && (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={
+                              <Tooltip id="button-tooltip">Edit</Tooltip>
+                            }
+                          >
+                            <button className="edit-btn">
+                              <img src="./edit.svg" alt="" />
+                            </button>
+                          </OverlayTrigger>
+                        )}
+
+                        {data?.deletedAt ? (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={
+                              <Tooltip id="button-tooltip">Restore</Tooltip>
+                            }
+                          >
+                            <button
+                              className="restore-btn"
+                              onClick={() => {
+                                setstationToRestore(data.id);
+                                handleShow();
+                                setisArchive(true);
+                              }}
+                            >
+                              <img src="./restore.svg" alt="" />
+                            </button>
+                          </OverlayTrigger>
+                        ) : (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={
+                              <Tooltip id="button-tooltip">Archive</Tooltip>
+                            }
+                          >
+                            <button
+                              className="archive-btn"
+                              onClick={() => {
+                                setstationToArchive(data?.id);
+                                handleShow();
+                                setisArchive(false);
+                              }}
+                            >
+                              <img src="./archive.svg" alt="" />
+                            </button>
+                          </OverlayTrigger>
+                        )}
+                      </td>
+                      {/* <td style={{ minWidth: "97px" }}>
                         <OverlayTrigger
                           placement="top"
                           overlay={<Tooltip id="button-tooltip">Edit</Tooltip>}
@@ -773,7 +825,7 @@ export default function ChargingStations() {
                             </button>
                           </OverlayTrigger>
                         )}
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}
